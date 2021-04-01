@@ -2,6 +2,9 @@
 Connect 4 board logic
 """
 
+width = 5
+col = 7
+
 
 def update_board(board, stack, action, player):
     """Update board position"""
