@@ -34,6 +34,23 @@ def monte_carlo_tree_search():
     while num_iterations < max_iterations:
         node = current_node.select_node()
 
+        if node.is_terminal:
+            # immediately back-propagate value
+            pass
+        else:
+            # expand
+            pass
 
+            # simulate
+
+
+def simulate(node, policy) -> float:
+    """
+    Simulate game end of game by sampling actions from policy
+    :param node:
+    :param policy:
+    :return: expected value of node
+    """
+    pass
 
 

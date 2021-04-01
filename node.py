@@ -9,7 +9,7 @@ class Node:
     Tree Node from monte carlo tree search
     """
 
-    def __init__(self, expected_reward=0, probability=0, board=None, parent=None):
+    def __init__(self, expected_reward=0, probability=0, board=None, parent=None, is_terminal=False):
         if not board:
             self.board = np.zeros((width, col))
 
@@ -18,6 +18,7 @@ class Node:
         self.expected_reward = expected_reward  # expected reward from being in current state
         self.probability = probability  # probability of current node being played
         self.parent = parent
+        self.is_terminal = is_terminal
 
     def _ucb_score(self):
         """
@@ -38,7 +39,7 @@ class Node:
         """
         self.visit_count += 1
 
-        if not self.children:  # terminal
+        if not self.children or self.is_terminal:  # terminal or leaf
             return self
 
         max_ucb = 0

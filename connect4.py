@@ -39,3 +39,16 @@ def update_board(board, stack, action, player):
 
     # not terminal state
     return board, stack, False
+
+
+def expand_board(node):
+    """
+    expand node's children
+    :return:
+    """
+
+    # generate all legal actions
+    # generate board state from actions
+    # check if states are terminal
+    # set node's children to generated children nodes
+    pass
