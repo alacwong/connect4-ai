@@ -1,24 +1,14 @@
 """
 Connect 4 board logic
 """
-
-width = 5
-col = 7
+from node import Node
+from constants import row, col, directions
+import numpy as np
+from model import PolicyModel, ValueModel
 
 
 def update_board(board, stack, action, player):
     """Update board position"""
-
-    directions = [
-        (0, 1),
-        (1, 0),
-        (-1, 0),
-        (0, -1),
-        (1, 1),
-        (-1, -1),
-        (1, -1),
-        (-1, 1)
-    ]
 
     board[action][stack[action]] = player
     stack[action] += 1
@@ -41,7 +31,17 @@ def update_board(board, stack, action, player):
     return board, stack, False
 
 
-def expand_board(node):
+def _get_stack(board: np.ndarray) -> np.ndarray:
+    """
+    Helper to count number available actions
+    """
+
+    return np.array(
+        [col - np.count_nonzero(board[:, i]) for i in range(col)]
+    )
+
+
+def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueModel):
     """
     expand node's children
     :return:
@@ -51,4 +51,22 @@ def expand_board(node):
     # generate board state from actions
     # check if states are terminal
     # set node's children to generated children nodes
-    pass
+
+    current_board = node.board
+    stack = _get_stack(current_board)
+    dist = policy_network.compute_policy(current_board)
+
+    # remove illegal actions from action distribution
+    for i in range(row):
+        if stack[i] == col:
+            dist[i] = 0
+
+    # normalize distribution
+    dist = dist / np.sum(dist)
+
+    for i in range(row):
+        if stack[i] != col:
+            # update accordingly
+            node.children.append(
+                Node()
+            )

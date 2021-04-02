@@ -15,7 +15,7 @@ class Node:
 
         self.children = []  # states reaching by taking action a from current state
         self.visit_count = 0  # number of times visited during mtcs
-        self.expected_reward = expected_reward  # expected reward from being in current state
+        self.expected_reward = expected_reward  # expected reward (initially based on value-network)
         self.probability = probability  # probability of current node being played
         self.parent = parent
         self.is_terminal = is_terminal
@@ -50,3 +50,10 @@ class Node:
                 max_ucb = child.get_ucb()
 
         return selected_child.select_node()
+
+    def update_reward(self, reward):
+        """
+        Update child's reward
+        :param reward:
+        :return:
+        """
