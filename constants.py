@@ -11,3 +11,8 @@ directions = (
     (1, -1),
     (-1, 1)
 )
+
+DRAW = 3
+WIN = 1
+LOSS = 2
+PLAY = 0

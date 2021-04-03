@@ -1,10 +1,12 @@
 """
-Different neural network model
+Different neural network models
 """
 
 from abc import ABC
 import numpy as np
 
+
+# Model interfaces
 
 class ValueModel(ABC):
 
@@ -16,5 +18,7 @@ class ValueModel(ABC):
 class PolicyModel(ABC):
 
     def compute_policy(self, state) -> np.array:
-        """Compute policy distrbution of actions from state """
+        """Compute policy distribution of actions from state """
         pass
+
+# Model Implementations

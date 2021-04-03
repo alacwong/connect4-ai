@@ -40,7 +40,6 @@ def monte_carlo_tree_search():
         else:
             # expand
             pass
-
             # simulate
 
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
-from constants import width, col
+from constants import row, col
 
 
 class Node:
@@ -11,7 +11,7 @@ class Node:
 
     def __init__(self, expected_reward=0, probability=0, board=None, parent=None, is_terminal=False):
         if not board:
-            self.board = np.zeros((width, col))
+            self.board = np.zeros((row, col))
 
         self.children = []  # states reaching by taking action a from current state
         self.visit_count = 0  # number of times visited during mtcs
@@ -53,7 +53,8 @@ class Node:
 
     def update_reward(self, reward):
         """
-        Update child's reward
+        Update reward recursively
+        (early stops, if reward value remains the same, does not propagate)
         :param reward:
         :return:
         """
