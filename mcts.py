@@ -22,7 +22,7 @@ import numpy as np
 # expand node's children
 # simulate each of the node's children using policy distrbution
 
-def monte_carlo_tree_search():
+def monte_carlo_tree_search(root: Node) -> int:
     """
     Run monte carlo tree search
     1. Repeat for n simulations
@@ -32,7 +32,6 @@ def monte_carlo_tree_search():
 
     num_iterations = 0
 
-    root = Node(np.zeros((row, col)), action_id=0)
     current_node = root
     value_model = MockValueModel()
     policy_model = MockPolicyModel()
@@ -44,6 +43,14 @@ def monte_carlo_tree_search():
             expand_board(node, policy_model, value_model)
             reward = simulate(node, policy_model)
             node.update_reward(reward)
+
+    max_visit, optimal_action = 0, 0
+    for child in root.children:
+        if child.visit_count > max_visit:
+            max_visit = child.visit_count
+            optimal_action = child.action_id
+
+    return optimal_action
 
 
 def simulate(node, policy):

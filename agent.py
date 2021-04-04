@@ -6,6 +6,8 @@ from abc import ABC
 import numpy as np
 from util import get_stack
 from constants import row, col
+from node import Node
+from mcts import monte_carlo_tree_search
 
 
 class Agent(ABC):
@@ -48,7 +50,7 @@ class RandomAgent(Agent):
     def update_board(self, board):
         self.board = board
 
-    def __init__(self, board=None):
+    def __init__(self, board):
         self.board = board
 
 
@@ -56,6 +58,27 @@ class MCTSAgent(Agent):
     """
     Agent plays using mcts guided by policy and value network
     """
+
+    def __init__(self, board):
+        self.tree = Node(board=board, action_id=0)
+        self.root = self.tree
+
+    def play(self) -> int:
+        """
+        :return:
+        """
+        monte_carlo_tree_search()
+        return 0
+
+
+
+    def update_board(self, board):
+        """
+        use mcts to select optimal action
+        :param board:
+        :return:
+        """
+
 
 
 class MiniMaxAgent(Agent):
