@@ -3,12 +3,13 @@ Train neural network
 
 Plan for training networks (from mcts self play)
 
-1. Play n games with m simulations.
-2. For each game, record mcts distributions and value from tree.
-3. Split n games into k batches.
-4. Average state values for each batch.
-5. Train networks on batches.
-6. Iterate with updated networks.
+1. Randomly select previous agent to train
+2. Play n games with m simulations per move
+3. For each game, record mcts distributions and value from tree.
+4. Split n games into k batches.
+5. Average state values for each batch.
+6. Train networks on batches.
+7. Iterate with updated networks.
 
 (batches may not be necessary due to simulations averaging out values, will try without or with small batches)
 """
@@ -17,6 +18,7 @@ from tensorflow import keras
 from constants import col, row
 from node import Node
 from collections import deque, defaultdict
+import numpy as np
 
 
 def get_policy_network():
@@ -46,10 +48,10 @@ def get_value_network():
 
     model = keras.Sequential(
         [
-            keras.Input((col * row)),
-            keras.layers.Dense((col * row), activation='relu'),
-            keras.layers.Dense((col * row), activation='relu'),
-            keras.layers.Dense((1,), activation='sigmoid')
+            keras.Input(shape=(col * row)),
+            keras.layers.Dense(col * row, activation='relu'),
+            keras.layers.Dense(col * row, activation='relu'),
+            keras.layers.Dense(1, activation='sigmoid')
         ]
     )
 
@@ -84,3 +86,14 @@ def record_tree(root: Node):
 
         # need to update mcts to include action number in children
         # so we can get the distribution
+
+
+if __name__ == '__main__':
+    value_network = get_value_network()
+    # print(value_network.summary())
+    y = np.zeros(col * row).reshape(1, 42)
+    y[0][1] = -1
+    x = value_network.predict(
+        y
+    )
+    print(x)
