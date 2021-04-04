@@ -1,8 +1,9 @@
 """ Monte carlo tree search"""
-from constants import max_iterations
+from constants import max_iterations, row, col, PLAY, WIN, DRAW
 from node import Node
-from util import expand_board
+from util import expand_board, get_stack, get_new_state
 from model import MockValueModel, MockPolicyModel
+import numpy as np
 
 
 # ucb = Q(s,a) + u(s,a)
@@ -40,15 +41,63 @@ def monte_carlo_tree_search():
         node = current_node.select_node()
 
         if not node.is_terminal:
-            # expand node
             expand_board(node, policy_model, value_model)
+            reward = simulate(node, policy_model)
+            node.update_reward(reward)
 
 
-def simulate(node, policy) -> float:
+def simulate(node, policy):
     """
     Simulate game end of game by sampling actions from policy
     :param node:
     :param policy:
     :return: expected value of node
     """
-    pass
+
+    if node.is_terminal:
+
+        # propagate value if it has not been
+        return node.expected_reward
+    else:
+        simulated_reward = 0
+
+        # compute expected reward through simulation
+        for child in node.children:
+            board = child.board
+            stack = get_stack(board)
+
+            end_simulation = False
+            num_moves = 0
+
+            while end_simulation:
+
+                dist = policy.compute_policy(board)
+
+                # remove illegal actions from action distribution
+                for i in range(row):
+                    if stack[i] == col:
+                        dist[i] = 0
+
+                # normalize distribution
+                dist /= np.sum(dist)
+
+                # randomly sample from distribution
+                action = np.random.choice(np.arange(row), p=dist)
+                new_state = get_new_state(board, stack, action)
+
+                # update board and continue simulating
+                if new_state == PLAY:
+                    stack[action] += 1
+                    board[stack[action]] = 1
+                    num_moves += 1
+                elif new_state == DRAW:
+                    simulated_reward += 0.5
+                    end_simulation = True
+                else:
+                    # update reward (1 for win, 0 for loss)
+                    if num_moves % 2 == 0:
+                        simulated_reward += 1
+                    end_simulation = True
+
+        return simulated_reward / len(node.children)
+

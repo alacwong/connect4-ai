@@ -5,8 +5,6 @@ Different neural network models
 from abc import ABC
 import numpy as np
 from constants import row
-from tensorflow import keras
-from constants import row, col
 
 
 # Model interfaces

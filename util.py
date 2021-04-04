@@ -7,7 +7,7 @@ import numpy as np
 from model import PolicyModel, ValueModel
 
 
-def _get_stack(board: np.ndarray) -> np.ndarray:
+def get_stack(board: np.ndarray) -> np.ndarray:
     """
     Helper to count number available actions
     """
@@ -17,7 +17,7 @@ def _get_stack(board: np.ndarray) -> np.ndarray:
     )
 
 
-def _new_state(board: np.ndarray, stack, action) -> int:
+def get_new_state(board: np.ndarray, stack, action) -> int:
     """
     Helper to check if current board state is terminal
     a board state is terminal if it is w/l/draw
@@ -60,7 +60,7 @@ def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueMo
     """
 
     current_board = node.board
-    stack = _get_stack(current_board)
+    stack = get_stack(current_board)
     dist = policy_network.compute_policy(current_board)
 
     # remove illegal actions from action distribution
@@ -82,7 +82,7 @@ def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueMo
         if stack[i] != col:
             # update accordingly
 
-            new_state = _new_state(current_board, stack, i)
+            new_state = get_new_state(current_board, stack, i)
 
             # terminal leaf node
             if new_state == WIN or new_state == DRAW:
