@@ -16,6 +16,7 @@ Plan for training networks (from mcts self play)
 from tensorflow import keras
 from constants import col, row
 from node import Node
+from collections import deque, defaultdict
 
 
 def get_policy_network():
@@ -63,4 +64,23 @@ def record_tree(root: Node):
     :param root:
     :return:
     """
-    pass
+
+    prior = defaultdict(list)
+    value = defaultdict(list)
+
+    q = deque([root])
+
+    # use bfs to record state -> value pairs and state -> action distribution
+
+    while q:
+        node = q.pop()
+
+        # add to q
+        if not node.is_terminal:
+            for child in node.children:
+                q.append(child)
+
+        value[str(node.board)].append(node.simulated_reward)
+
+        # need to update mcts to include action number in children
+        # so we can get the distribution
