@@ -32,7 +32,7 @@ def monte_carlo_tree_search():
 
     num_iterations = 0
 
-    root = Node()
+    root = Node(np.zeros((row, col)), action_id=0)
     current_node = root
     value_model = MockValueModel()
     policy_model = MockPolicyModel()

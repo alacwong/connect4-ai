@@ -73,7 +73,6 @@ def record_tree(root: Node):
     q = deque([root])
 
     # use bfs to record state -> value pairs and state -> action distribution
-
     while q:
         node = q.pop()
 
@@ -84,8 +83,12 @@ def record_tree(root: Node):
 
         value[str(node.board)].append(node.simulated_reward)
 
-        # need to update mcts to include action number in children
-        # so we can get the distribution
+        dist = [0] * row
+
+        for child in node.children:
+            dist[child.action_id] = child.visit_count
+
+        prior[str(node.board)].append(np.array(dist))
 
 
 if __name__ == '__main__':

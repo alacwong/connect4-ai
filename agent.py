@@ -10,9 +10,16 @@ from constants import row, col
 
 class Agent(ABC):
 
-    def play(self, board: np.ndarray) -> int:
+    def play(self) -> int:
         """
         select action
+        :return:
+        """
+        pass
+
+    def update_board(self, board):
+        """
+        update agent's board state
         :return:
         """
         pass
@@ -23,14 +30,13 @@ class RandomAgent(Agent):
     agent plays randomly
     """
 
-    def play(self, board) -> int:
+    def play(self) -> int:
         """
         select action randomly
-        :param board:
         :return:
         """
 
-        stack = get_stack(board)
+        stack = get_stack(self.board)
 
         actions = []
         for i in range(row):
@@ -38,6 +44,12 @@ class RandomAgent(Agent):
                 actions.append(i)
 
         return np.random.choice(np.array(actions))
+
+    def update_board(self, board):
+        self.board = board
+
+    def __init__(self, board=None):
+        self.board = board
 
 
 class MCTSAgent(Agent):

@@ -92,6 +92,7 @@ def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueMo
 
                 node.children.append(
                     Node(
+                        action_id=i,
                         expected_reward=expected_reward,
                         probability=dist[i],
                         board=new_board,
@@ -103,6 +104,7 @@ def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueMo
             else:
                 node.children.append(
                     Node(
+                        action_id=i,
                         expected_reward=value_network.compute_value(current_board),
                         probability=dist[i],
                         board=new_board,

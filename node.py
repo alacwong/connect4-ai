@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-import numpy as np
-from constants import row, col, simulation_constant
+from constants import simulation_constant
 
 
 class Node:
@@ -9,10 +8,9 @@ class Node:
     Tree Node from monte carlo tree search
     """
 
-    def __init__(self, expected_reward=0, probability=0, board=None, parent=None, is_terminal=False):
-        if not board:
-            self.board = np.zeros((row, col))
+    def __init__(self, board, action_id, expected_reward=0, probability=0, parent=None, is_terminal=False):
 
+        self.board = board
         self.children = []  # states reaching by taking action a from current state
         self.visit_count = 0  # number of times visited during mcts
         self.expected_reward = expected_reward  # expected reward (initially based on value-network)
