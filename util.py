@@ -51,14 +51,13 @@ def _new_state(board: np.ndarray, stack, action) -> int:
 
 def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueModel):
     """
-    expand node's children
+    Expand node's children
+    1. generate all legal actions
+    2. generate board states from actions
+    3. deal with terminal edge case
+    4. add new children to parent
     :return:
     """
-
-    # generate all legal actions
-    # generate board state from actions
-    # check if states are terminal
-    # set node's children to generated children nodes
 
     current_board = node.board
     stack = _get_stack(current_board)
@@ -97,6 +96,7 @@ def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueMo
                         probability=dist[i],
                         board=new_board,
                         is_terminal=terminal,
+                        parent=node
                     )
                 )
 
@@ -106,5 +106,6 @@ def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueMo
                         expected_reward=value_network.compute_value(current_board),
                         probability=dist[i],
                         board=new_board,
+                        parent=node
                     )
                 )

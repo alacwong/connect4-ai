@@ -1,6 +1,9 @@
 """ Monte carlo tree search"""
 from constants import max_iterations
 from node import Node
+from util import expand_board
+from model import MockValueModel, MockPolicyModel
+
 
 # ucb = Q(s,a) + u(s,a)
 # u(s,a) = p(s,a)/ 1 + visit_count
@@ -30,17 +33,15 @@ def monte_carlo_tree_search():
 
     root = Node()
     current_node = root
+    value_model = MockValueModel()
+    policy_model = MockPolicyModel()
 
     while num_iterations < max_iterations:
         node = current_node.select_node()
 
-        if node.is_terminal:
-            # immediately back-propagate value
-            pass
-        else:
-            # expand
-            pass
-            # simulate
+        if not node.is_terminal:
+            # expand node
+            expand_board(node, policy_model, value_model)
 
 
 def simulate(node, policy) -> float:
@@ -51,5 +52,3 @@ def simulate(node, policy) -> float:
     :return: expected value of node
     """
     pass
-
-
