@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
-from constants import row, col
+from constants import row, col, simulation_constant
 
 
 class Node:
@@ -14,13 +14,14 @@ class Node:
             self.board = np.zeros((row, col))
 
         self.children = []  # states reaching by taking action a from current state
-        self.visit_count = 0  # number of times visited during mtcs
+        self.visit_count = 0  # number of times visited during mcts
         self.expected_reward = expected_reward  # expected reward (initially based on value-network)
+        self.simulated_reward = 0 # reward after simulating the world
         self.probability = probability  # probability of current node being played
         self.parent = parent
         self.is_terminal = is_terminal
 
-    def _ucb_score(self):
+    def ucb_score(self):
         """
         Ucb score of node
         computed as Q(s, a) + U(s, a)
@@ -29,7 +30,9 @@ class Node:
         :return:
         """
         u = self.probability / 1 + self.visit_count
-        q = 0
+        q = (1 - simulation_constant) * self.expected_reward + (
+                (simulation_constant * self.simulated_reward) / self.visit_count
+        )
         return u + q
 
     def select_node(self) -> Node:
@@ -51,10 +54,24 @@ class Node:
 
         return selected_child.select_node()
 
-    def update_reward(self, reward):
+    def update_reward(self, reward=None):
         """
         Update reward recursively
         (early stops, if reward value remains the same, does not propagate)
         :param reward:
         :return:
         """
+
+        if reward:
+            if self.simulated_reward != reward:
+                self.simulated_reward = reward
+                self.parent.update_reward()
+        else:
+            total_reward = 0
+            for child in self.children:
+                total_reward += child.simulated_reward
+
+            # update if change
+            if total_reward / len(self.children) != self.simulated_reward:
+                self.simulated_reward = total_reward/len(self.children)
+                self.parent.update_reward()

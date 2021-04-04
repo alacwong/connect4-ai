@@ -56,7 +56,7 @@ def simulate(node, policy):
 
     if node.is_terminal:
 
-        # propagate value if it has not been
+        # immediately propagate
         return node.expected_reward
     else:
         simulated_reward = 0

@@ -12,6 +12,8 @@ directions = (
     (-1, 1)
 )
 
+simulation_constant = 0.5
+
 DRAW = 3
 WIN = 1
 LOSS = 2
