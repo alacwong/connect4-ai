@@ -19,7 +19,7 @@ class Agent(ABC):
         """
         pass
 
-    def update_board(self, board):
+    def update_board(self, action: int):
         """
         update agent's board state
         :return:
@@ -38,22 +38,21 @@ class RandomAgent(Agent):
         :return:
         """
 
-        stack = get_stack(self.board)
-
         actions = []
         for i in range(row):
-            if stack[i] < col:
+            if self.stack[i] < col:
                 actions.append(i)
 
         return np.random.choice(np.array(actions))
 
     def update_board(self, action):
-        count = np.count_nonzero(action)
-        self.board[action][col - count] = -1 * self.player
+        self.board[action][col - self.stack[action]] = -1 * self.player
+        self.stack[action] += 1
 
     def __init__(self, board, player):
         self.board = board
         self.player = player
+        self.stack = get_stack(board)
 
 
 class MCTSAgent(Agent):
