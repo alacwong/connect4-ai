@@ -49,7 +49,7 @@ class RandomAgent(Agent):
 
     def update_board(self, action):
         count = np.count_nonzero(action)
-        self.board[action][col - count] = self.player
+        self.board[action][col - count] = -1 * self.player
 
     def __init__(self, board, player):
         self.board = board
@@ -61,23 +61,31 @@ class MCTSAgent(Agent):
     Agent plays using mcts guided by policy and value network
     """
 
-    def __init__(self, board):
+    def __init__(self, board, player):
         self.tree = Node(board=board, action_id=0)
         self.root = self.tree
+        self.board = board
+        self.player = player
 
     def play(self) -> int:
         """
         :return:
         """
-        return monte_carlo_tree_search(self.root)
+        node = monte_carlo_tree_search(self.root)
+        self.root = node
+        return node.action_id
 
     def update_board(self, action):
         """
-        use mcts to select optimal action
-        :param board:
+        Update current board position
+        :param action:
         :return:
         """
 
+        # traverse tree
+        for child in self.root:
+            if child.action_id == action:
+                self.root = child
 
 
 class MiniMaxAgent(Agent):
