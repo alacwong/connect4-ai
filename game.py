@@ -5,7 +5,7 @@ Game play for
 from agent import Agent
 import numpy as np
 from constants import col, row
-from util import get_stack, get_new_state, WIN, DRAW
+from util import get_stack, get_new_state, PLAY
 
 
 def run(player_0: Agent, player_1: Agent):
@@ -23,10 +23,10 @@ def run(player_0: Agent, player_1: Agent):
         1: player_1
     }
 
-    is_terminal = False
+    is_terminal = True
 
     while is_terminal:
-
+        print(f'Turn {num_turns}')
         turn = num_turns % 2
         player = (-1) ** turn
 
@@ -36,7 +36,7 @@ def run(player_0: Agent, player_1: Agent):
 
         # check board status
         new_state = get_new_state(board, stack, action)
-        is_terminal = new_state == WIN or new_state == DRAW
+        is_terminal = new_state != PLAY
 
         # update board
         board[action][col - stack[action]] = player

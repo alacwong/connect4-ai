@@ -13,7 +13,7 @@ def get_stack(board: np.ndarray) -> np.ndarray:
     """
 
     return np.array(
-        [col - np.count_nonzero(board[:, i]) for i in range(col)]
+        [col - np.count_nonzero(board[:, i]) for i in range(row)]
     )
 
 
@@ -21,6 +21,8 @@ def get_new_state(board: np.ndarray, stack, action) -> int:
     """
     Helper to check if current board state is terminal
     a board state is terminal if it is w/l/draw
+    :param action:
+    :param stack:
     :param board:
     :return:
     """
@@ -62,6 +64,8 @@ def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueMo
     current_board = node.board
     stack = get_stack(current_board)
     dist = policy_network.compute_policy(current_board)
+
+    print(policy_network)
 
     # remove illegal actions from action distribution
     for i in range(row):

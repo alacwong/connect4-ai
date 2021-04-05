@@ -45,6 +45,8 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
             reward = simulate(node, policy_model)
             node.update_reward(reward)
 
+        num_iterations += 1
+
     max_visit, optimal_child = 0, None
     for child in root.children:
         if child.visit_count > max_visit:
@@ -74,7 +76,7 @@ def simulate(node, policy):
             board = child.board
             stack = get_stack(board)
 
-            end_simulation = False
+            end_simulation = True
             num_moves = 0
 
             while end_simulation:
@@ -100,11 +102,11 @@ def simulate(node, policy):
                     num_moves += 1
                 elif new_state == DRAW:
                     simulated_reward += 0.5
-                    end_simulation = True
+                    end_simulation = False
                 else:
                     # update reward (1 for win, 0 for loss)
                     if num_moves % 2 == 0:
                         simulated_reward += 1
-                    end_simulation = True
+                    end_simulation = False
 
         return simulated_reward / len(node.children)

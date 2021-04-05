@@ -53,7 +53,7 @@ class AlphaValueModel(ValueModel):
             self.network = get_value_network()
 
     def compute_value(self, state) -> float:
-        return self.network.predict(state.reshape((1, col * row)))
+        return self.network.predict(state.reshape((1, col * row)))[0]
 
 
 class AlphaPolicyModel(PolicyModel):
@@ -65,4 +65,4 @@ class AlphaPolicyModel(PolicyModel):
             self.network = get_policy_network()
 
     def compute_value(self, state) -> np.ndarray:
-        return self.network.predict(state.reshape((1, col * row)))
+        return self.network.predict(state.reshape((1, col * row)))[0]

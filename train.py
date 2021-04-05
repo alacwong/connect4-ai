@@ -32,7 +32,7 @@ def get_policy_network():
             keras.Input((col * row)),
             keras.layers.Dense((col * row), activation='relu'),
             keras.layers.Dense((col * row), activation='relu'),
-            keras.layers.Dense((row,), activation='softmax')
+            keras.layers.Dense(row, activation='softmax')
         ]
     )
 
@@ -96,7 +96,7 @@ if __name__ == '__main__':
     # print(value_network.summary())
     y = np.zeros(col * row).reshape(1, 42)
     y[0][1] = -1
-    x = value_network.predict(
+    x = get_policy_network().predict(
         y
     )
     print(x)
