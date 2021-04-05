@@ -47,11 +47,13 @@ class RandomAgent(Agent):
 
         return np.random.choice(np.array(actions))
 
-    def update_board(self, board):
-        self.board = board
+    def update_board(self, action):
+        count = np.count_nonzero(action)
+        self.board[action][col - count] = self.player
 
-    def __init__(self, board):
+    def __init__(self, board, player):
         self.board = board
+        self.player = player
 
 
 class MCTSAgent(Agent):
@@ -67,12 +69,9 @@ class MCTSAgent(Agent):
         """
         :return:
         """
-        monte_carlo_tree_search()
-        return 0
+        return monte_carlo_tree_search(self.root)
 
-
-
-    def update_board(self, board):
+    def update_board(self, action):
         """
         use mcts to select optimal action
         :param board:

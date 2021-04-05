@@ -95,7 +95,7 @@ def simulate(node, policy):
                 # update board and continue simulating
                 if new_state == PLAY:
                     stack[action] += 1
-                    board[stack[action]] = 1
+                    board[col - stack[action]] = 1
                     num_moves += 1
                 elif new_state == DRAW:
                     simulated_reward += 0.5

@@ -11,6 +11,7 @@ class Node:
     def __init__(self, board, action_id, expected_reward=0, probability=0, parent=None, is_terminal=False):
 
         self.board = board
+        self.action_id = action_id
         self.children = []  # states reaching by taking action a from current state
         self.visit_count = 0  # number of times visited during mcts
         self.expected_reward = expected_reward  # expected reward (initially based on value-network)

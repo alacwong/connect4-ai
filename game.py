@@ -3,18 +3,24 @@ Game play for
 """
 
 from agent import Agent
-import numpy as np
-from constants import col, row
+from typing import List
+from abc import ABC
 
 
-def run(agent_a: Agent, agent_b: Agent):
+class InitAgents(ABC):
+
+    def init_agents(self) -> List[Agent]:
+        """
+        Initialize agents
+        :return:
+        """
+        pass
+
+
+def run(load_agents: InitAgents):
     """
     simulate game with 2 agents
-    :param agent_a:
-    :param agent_b:
     :return:
     """
 
-    board = np.zeros((row, col))
-
-
+    agent_a, agent_b = load_agents.init_agents()
