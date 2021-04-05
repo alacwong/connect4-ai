@@ -2,7 +2,7 @@
 from constants import max_iterations, row, col, PLAY, WIN, DRAW
 from node import Node
 from util import expand_board, get_stack, get_new_state
-from model import MockValueModel, MockPolicyModel
+from model import ValueModel, PolicyModel
 import numpy as np
 
 
@@ -20,9 +20,9 @@ import numpy as np
 # do until n simulations:
 # select node (traverse tree by ucb)
 # expand node's children
-# simulate each of the node's children using policy distrbution
+# simulate each of the node's children using policy distribution
 
-def monte_carlo_tree_search(root: Node) -> Node:
+def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: PolicyModel) -> Node:
     """
     Run monte carlo tree search
     1. Repeat for n simulations
@@ -36,8 +36,6 @@ def monte_carlo_tree_search(root: Node) -> Node:
     num_iterations = 0
 
     current_node = root
-    value_model = MockValueModel()
-    policy_model = MockPolicyModel()
 
     while num_iterations < max_iterations:
         node = current_node.select_node()

@@ -8,6 +8,7 @@ from util import get_stack
 from constants import row, col
 from node import Node
 from mcts import monte_carlo_tree_search
+from model import ValueModel, PolicyModel
 
 
 class Agent(ABC):
@@ -60,17 +61,19 @@ class MCTSAgent(Agent):
     Agent plays using mcts guided by policy and value network
     """
 
-    def __init__(self, board, player):
+    def __init__(self, board: np.ndarray, player: int, value_network: ValueModel, policy_network: PolicyModel):
         self.tree = Node(board=board, action_id=0)
         self.root = self.tree
         self.board = board
         self.player = player
+        self.value_model = value_network
+        self.policy_model = policy_network
 
     def play(self) -> int:
         """
         :return:
         """
-        node = monte_carlo_tree_search(self.root)
+        node = monte_carlo_tree_search(self.root, self.value_model, self.policy_model)
         self.root = node
         return node.action_id
 
@@ -92,3 +95,4 @@ class MiniMaxAgent(Agent):
     Agent plays using minimax with alpha beta pruning
     using value network as a partial configuration function
     """
+    pass

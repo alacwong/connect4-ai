@@ -1,3 +1,4 @@
-import numpy as np
+from game import run
 
-board = np.zeros((6, 7), dtype=int)
+if __name__ == '__main__':
+    print('Hello world!')
