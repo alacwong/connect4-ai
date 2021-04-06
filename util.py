@@ -1,117 +1,87 @@
 """
 Connect 4 board logic
 """
-from node import Node
 from constants import row, col, directions, WIN, PLAY, DRAW
 import numpy as np
-from model import PolicyModel, ValueModel
+from typing import Set
 
 
-def get_stack(board: np.ndarray) -> np.ndarray:
+class Board:
     """
-    Helper to count number available actions
-    """
-
-    return np.array(
-        [col - np.count_nonzero(board[:, i]) for i in range(row)]
-    )
-
-
-def get_new_state(board: np.ndarray, stack, action) -> int:
-    """
-    Helper to check if current board state is terminal
-    a board state is terminal if it is w/l/draw
-    :param action:
-    :param stack:
-    :param board:
-    :return:
+    Wrapper class abstraction for connect 4 board data structure
     """
 
-    pos_x, pos_y = action, stack[action]
+    @staticmethod
+    def get_empty(player):
+        return Board(
+            board=np.zeros(
+                (col, row)
+            ),
+            state=PLAY,
+            player=player
+        )
 
-    # terminal (check if win)
-    for direction in directions:
-        dir_x, dir_y = direction
-        x, y = pos_x, pos_y
-        count = 0
+    def __init__(self, board: np.ndarray, player, state):
+        self.board = board
+        self.state = state
+        self.stack = np.array([np.count_nonzero(board[:, i]) for i in range(row)])
+        self.player = player
 
-        while 0 <= x < row and 0 <= y < col and board[x][y] == 1:
-            count += 1
-            x, y = x + dir_x, y + dir_y
+    def play_action(self, action):
+        """
+        computes new board generated from perform action a
+        :param action:
+        :return:
+        """
 
-            # terminal board state connect 4!
-            if count >= 4:
-                return WIN
+        new_board = -1 * self.board.copy()
+        count = col - self.stack[action]
+        new_board[count][action] = -1 * self.player
+        state = None
 
-    # draw
-    if np.sum(stack) == row * col - 1:
-        return DRAW
+        pos_x, pos_y = action, count
 
-    # non terminal
-    return PLAY
+        # terminal (check if win)
+        for direction in directions:
+            dir_x, dir_y = direction
+            x, y = pos_x, pos_y
+            count = 0
 
+            while 0 <= x < row and 0 <= y < col and new_board[y][x] == 1:
+                count += 1
+                x, y = x + dir_x, y + dir_y
 
-def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueModel):
-    """
-    Expand node's children
-    1. generate all legal actions
-    2. generate board states from actions
-    3. deal with terminal edge case
-    4. add new children to parent
-    :return:
-    """
+                # terminal board state connect 4!
+                if count >= 4:
+                    state = WIN
 
-    current_board = node.board
-    stack = get_stack(current_board)
-    dist = policy_network.compute_policy(current_board)
+        if np.sum(self.stack) == (col * row - 1) and not state:
+            state = DRAW
+        else:
+            state = PLAY
 
-    print(policy_network)
+        return Board(
+            board=new_board,
+            player=-1 * self.player,
+            state=state
+        )
 
-    # remove illegal actions from action distribution
-    for i in range(row):
-        if stack[i] == col:
-            dist[i] = 0
+    def get_valid_actions(self) -> Set:
 
-    # normalize distribution
-    dist = dist / np.sum(dist)
+        actions = set()
+        for elem in self.stack:
+            if elem < col:
+                actions.add(elem)
 
-    for i in range(row):
+        return actions
 
-        # reverse player and update move
-        new_board = current_board.copy() * -1
-        new_board[stack[i]] = 1
+    def __copy__(self):
+        return Board(
+            board=self.board.copy(),
+            state=self.state,
+            player=self.player
+        )
 
-        # check if node is terminal
+    def copy(self):
+        return self.__copy__()
 
-        if stack[i] != col:
-            # update accordingly
-
-            new_state = get_new_state(current_board, stack, i)
-
-            # terminal leaf node
-            if new_state == WIN or new_state == DRAW:
-                terminal = True
-                actual_reward = 1 if new_state == WIN else 0
-                expected_reward = actual_reward + value_network.compute_value(current_board)
-
-                node.children.append(
-                    Node(
-                        action_id=i,
-                        expected_reward=expected_reward,
-                        probability=dist[i],
-                        board=new_board,
-                        is_terminal=terminal,
-                        parent=node
-                    )
-                )
-
-            else:
-                node.children.append(
-                    Node(
-                        action_id=i,
-                        expected_reward=value_network.compute_value(current_board),
-                        probability=dist[i],
-                        board=new_board,
-                        parent=node
-                    )
-                )

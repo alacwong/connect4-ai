@@ -1,7 +1,6 @@
 """ Monte carlo tree search"""
 from constants import max_iterations, row, col, PLAY, WIN, DRAW
 from node import Node
-from util import expand_board, get_stack, get_new_state
 from model import ValueModel, PolicyModel
 import numpy as np
 
@@ -56,6 +55,43 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
     return optimal_child
 
 
+def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueModel):
+    """
+    Expand node's children
+    1. generate all legal actions
+    2. generate board states from actions
+    3. deal with terminal edge case
+    4. add new children to parent
+    :return:
+    """
+
+    current_board = node.board
+    dist = policy_network.compute_policy(current_board.board)
+    valid_actions = current_board.get_valid_actions()
+
+    # remove illegal actions from action distribution
+    for i in range(row):
+        if i not in valid_actions:
+            dist[i] = 0
+
+    # normalize distribution
+    dist = dist / np.sum(dist)
+
+    for action in valid_actions:
+        new_board = current_board.play_action(action)
+
+        node.children.append(
+            Node(
+                action_id=action,
+                expected_reward=value_network.compute_value(new_board.board),
+                probability=dist[action],
+                board=new_board,
+                parent=node,
+                is_terminal=new_board.state != PLAY
+            )
+        )
+
+
 def simulate(node, policy):
     """
     Simulate game end of game by sampling actions from policy
@@ -66,47 +102,37 @@ def simulate(node, policy):
 
     if node.is_terminal:
 
-        # immediately propagate
-        return node.expected_reward
+        # compute actual reward
+        if node.board.state == WIN:
+            return 1
+        else:
+            return 0.5
     else:
         simulated_reward = 0
 
         # compute expected reward through simulation
         for child in node.children:
-            board = child.board
-            stack = get_stack(board)
+            board = child.board.copy()
 
             end_simulation = True
             num_moves = 0
 
             while end_simulation:
 
-                dist = policy.compute_policy(board)
-
-                # remove illegal actions from action distribution
-                for i in range(row):
-                    if stack[i] == col:
-                        dist[i] = 0
-
-                # normalize distribution
-                dist /= np.sum(dist)
+                actions = board.get_valid_actions()
+                dist = policy.compute_policy(board.board, actions)
 
                 # randomly sample from distribution
                 action = np.random.choice(np.arange(row), p=dist)
-                new_state = get_new_state(board, stack, action)
+                board = board.play_action(action)
 
-                # update board and continue simulating
-                if new_state == PLAY:
-                    stack[action] += 1
-                    board[col - stack[action]] = 1
+                if board.state == PLAY:
                     num_moves += 1
-                elif new_state == DRAW:
+                elif board.state == DRAW:
                     simulated_reward += 0.5
                     end_simulation = False
-                else:
-                    # update reward (1 for win, 0 for loss)
+                else:   # win/loss
                     if num_moves % 2 == 0:
                         simulated_reward += 1
-                    end_simulation = False
 
         return simulated_reward / len(node.children)

@@ -19,7 +19,7 @@ class ValueModel(ABC):
 
 class PolicyModel(ABC):
 
-    def compute_policy(self, state: np.ndarray) -> np.array:
+    def compute_policy(self, state: np.ndarray, valid_actions) -> np.array:
         """Compute policy distribution of actions from state """
         pass
 
@@ -34,14 +34,20 @@ class MockValueModel(ValueModel):
 
 class MockPolicyModel(PolicyModel):
 
-    def compute_policy(self, state) -> np.array:
+    def compute_policy(self, state, valid_actions) -> np.array:
         """
         Assume uniform
+        :param valid_actions:
         :param state:
         :return:
         """
 
-        return np.array([1 / row for _ in range(row)])
+        dist = np.array([1 / row for _ in range(row)])
+        for i in range(row):
+            if i not in valid_actions:
+                dist[i] = 0
+
+        return dist/ np.sum(dist)
 
 
 class AlphaValueModel(ValueModel):
@@ -53,7 +59,7 @@ class AlphaValueModel(ValueModel):
             self.network = get_value_network()
 
     def compute_value(self, state) -> float:
-        return self.network.predict(state.reshape((1, col * row)))[0]
+        return self.network.predict(state.reshape((1, col * row)))[0][0]
 
 
 class AlphaPolicyModel(PolicyModel):
@@ -64,5 +70,9 @@ class AlphaPolicyModel(PolicyModel):
         if not network:
             self.network = get_policy_network()
 
-    def compute_value(self, state) -> np.ndarray:
-        return self.network.predict(state.reshape((1, col * row)))[0]
+    def compute_policy(self, state: np.ndarray, valid_actions) -> np.array:
+        dist = self.network.predict(state.reshape((1, col * row)))[0]
+        for i in range(row):
+            if i not in valid_actions:
+                dist[i] = 0
+        return dist / np.sum(dist)
