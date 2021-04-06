@@ -4,9 +4,9 @@ Agent class for different nn models
 
 from abc import ABC
 import numpy as np
-from util import Board
+from .util import Board
 from mcts.node import Node
-from mcts import monte_carlo_tree_search
+from .mcts import monte_carlo_tree_search
 from model import ValueModel, PolicyModel
 
 

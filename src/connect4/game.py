@@ -2,9 +2,9 @@
 Game play for
 """
 
-from agent import Agent
+from connect4.agent import Agent
 from constants import PLAY
-from util import Board
+from .util import Board
 
 
 def run(player_0: Agent, player_1: Agent):

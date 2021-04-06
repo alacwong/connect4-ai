@@ -5,7 +5,7 @@ Different neural network models
 from abc import ABC
 import numpy as np
 from constants import row, col
-from train import get_value_network, get_policy_network
+from .train import get_value_network, get_policy_network
 
 
 # Model interfaces
