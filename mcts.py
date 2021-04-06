@@ -1,5 +1,5 @@
 """ Monte carlo tree search"""
-from constants import max_iterations, row, col, PLAY, WIN, DRAW
+from constants import max_iterations, row, PLAY, WIN, DRAW
 from node import Node
 from model import ValueModel, PolicyModel
 import numpy as np
@@ -105,7 +105,7 @@ def simulate(node, policy):
         # compute actual reward
         if node.board.state == WIN:
             return 1
-        else:
+        else:   # must be draw
             return 0.5
     else:
         simulated_reward = 0
