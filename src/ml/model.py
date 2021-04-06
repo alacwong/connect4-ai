@@ -6,12 +6,14 @@ from abc import ABC
 import numpy as np
 from constants import row, col
 from ml.train import get_value_network, get_policy_network
+from abc import abstractmethod
 
 
 # Model interfaces
 
 class ValueModel(ABC):
 
+    @abstractmethod
     def compute_value(self, state: np.ndarray) -> float:
         """evaluate board state"""
         pass
@@ -19,6 +21,7 @@ class ValueModel(ABC):
 
 class PolicyModel(ABC):
 
+    @abstractmethod
     def compute_policy(self, state: np.ndarray, valid_actions) -> np.array:
         """Compute policy distribution of actions from state """
         pass

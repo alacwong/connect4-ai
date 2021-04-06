@@ -2,9 +2,9 @@
 Agent class for different nn models
 """
 
-from abc import ABC
+from abc import ABC, abstractmethod
 import numpy as np
-from .util import Board
+from connect4.util import Board
 from mcts.node import Node
 from mcts.mcts import monte_carlo_tree_search
 from ml.model import ValueModel, PolicyModel
@@ -12,6 +12,7 @@ from ml.model import ValueModel, PolicyModel
 
 class Agent(ABC):
 
+    @abstractmethod
     def play(self) -> int:
         """
         select action
@@ -19,6 +20,7 @@ class Agent(ABC):
         """
         pass
 
+    @abstractmethod
     def update_board(self, action: int):
         """
         update agent's board state

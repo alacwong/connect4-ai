@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from constants import simulation_constant
-from util import Board
+from connect4.util import Board
 
 
 class Node:
