@@ -1,8 +1,7 @@
-from model import AlphaPolicyModel, AlphaValueModel
-from agent import RandomAgent, MCTSAgent
-import numpy as np
-from constants import row, col
-from game import run
+from ml.model import AlphaPolicyModel, AlphaValueModel
+from connect4.agent import RandomAgent, MCTSAgent
+from connect4.game import run
+from connect4.util import Board
 
 if __name__ == '__main__':
     print('Hello world!')
@@ -11,14 +10,14 @@ if __name__ == '__main__':
     alpha_policy = AlphaPolicyModel()
 
     agent_1 = MCTSAgent(
-        board=np.zeros((col, row)),
+        board=Board.get_empty(1),
         player=1,
         value_network=alpha_value,
         policy_network=alpha_policy
     )
 
     agent_2 = RandomAgent(
-        board=np.zeros((col, row)),
+        board=Board.get_empty(-1),
         player=-1
     )
 

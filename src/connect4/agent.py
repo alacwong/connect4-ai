@@ -6,8 +6,8 @@ from abc import ABC
 import numpy as np
 from .util import Board
 from mcts.node import Node
-from .mcts import monte_carlo_tree_search
-from model import ValueModel, PolicyModel
+from mcts.mcts import monte_carlo_tree_search
+from ml.model import ValueModel, PolicyModel
 
 
 class Agent(ABC):

@@ -4,7 +4,7 @@ Game play for
 
 from connect4.agent import Agent
 from constants import PLAY
-from .util import Board
+from connect4.util import Board
 
 
 def run(player_0: Agent, player_1: Agent):
