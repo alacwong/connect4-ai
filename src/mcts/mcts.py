@@ -1,6 +1,6 @@
 """ Monte carlo tree search"""
 from constants import max_iterations, row, PLAY, WIN, DRAW
-from node import Node
+from mcts.node import Node
 from model import ValueModel, PolicyModel
 import numpy as np
 

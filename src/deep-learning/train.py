@@ -16,7 +16,7 @@ Plan for training networks (from mcts self play)
 
 from tensorflow import keras
 from constants import col, row
-from node import Node
+from mcts.node import Node
 from collections import deque, defaultdict
 import numpy as np
 
