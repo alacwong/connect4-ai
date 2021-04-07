@@ -10,14 +10,14 @@ if __name__ == '__main__':
     alpha_policy = AlphaPolicyModel()
 
     agent_1 = MCTSAgent(
-        board=Board.get_empty(1),
+        board=Board.get_empty(),
         player=1,
         value_network=alpha_value,
         policy_network=alpha_policy
     )
 
     agent_2 = RandomAgent(
-        board=Board.get_empty(-1),
+        board=Board.get_empty(),
         player=-1
     )
 

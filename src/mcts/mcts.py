@@ -1,7 +1,7 @@
 """ Monte carlo tree search"""
 from constants import max_iterations, row, PLAY, WIN, DRAW
 from mcts.node import Node
-from model import ValueModel, PolicyModel
+from ml.model import ValueModel, PolicyModel
 import numpy as np
 
 
@@ -66,8 +66,8 @@ def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueMo
     """
 
     current_board = node.board
-    dist = policy_network.compute_policy(current_board.board)
     valid_actions = current_board.get_valid_actions()
+    dist = policy_network.compute_policy(current_board.board, valid_actions)
 
     # remove illegal actions from action distribution
     for i in range(row):
@@ -118,7 +118,7 @@ def simulate(node, policy):
             num_moves = 0
 
             while end_simulation:
-
+                print('simulating')
                 actions = board.get_valid_actions()
                 dist = policy.compute_policy(board.board, actions)
 

@@ -81,7 +81,7 @@ def record_tree(root: Node):
             for child in node.children:
                 q.append(child)
 
-        value[str(node.board)].append(node.simulated_reward)
+        value[str(node.board.board)].append(node.simulated_reward)
 
         dist = [0] * row
 
@@ -91,12 +91,44 @@ def record_tree(root: Node):
         prior[str(node.board)].append(np.array(dist))
 
 
-if __name__ == '__main__':
-    value_network = get_value_network()
-    # print(value_network.summary())
-    y = np.zeros(col * row).reshape(1, 42)
-    y[0][1] = -1
-    x = get_policy_network().predict(
-        y
+def get_cnn_policy_model():
+    """
+    CNN architecture for policy model
+    """
+    model = keras.Sequential(
+        [
+            keras.layers.InputLayer(input_shape=(col, row, 1)),
+            keras.layers.Conv2D(32, (3, 3), input_shape=(col, row), activation='relu'),
+            keras.layers.Conv2D(32, (3, 3), input_shape=(col, row), activation='relu'),
+            keras.layers.Conv2D(32, (3, 3), input_shape=(col, row), activation='relu'),
+            keras.layers.Flatten(),
+            keras.layers.Dense(col * row, activation='relu'),
+            keras.layers.Dense(col, activation='softmax')
+        ]
     )
-    print(x)
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    return model
+
+
+def get_cnn_value_model():
+    """
+    CNN architecture for value model
+    """
+    model = keras.Sequential(
+        [
+            keras.layers.InputLayer(input_shape=(col, row, 1)),
+            keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
+            keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
+            keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
+            keras.layers.Flatten(),
+            keras.layers.Dense(col * row, activation='relu'),
+            keras.layers.Dense(1, activation='sigmoid')
+        ]
+    )
+    model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
+    return model
+
+
+if __name__ == '__main__':
+    cnn = get_cnn_value_model()
+    print(cnn.summary())

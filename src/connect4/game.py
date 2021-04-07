@@ -13,7 +13,7 @@ def run(player_0: Agent, player_1: Agent):
     :return:
     """
 
-    board = Board.get_empty(1)
+    board = Board.get_empty()
     num_turns = 0
 
     players = {

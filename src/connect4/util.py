@@ -12,20 +12,18 @@ class Board:
     """
 
     @staticmethod
-    def get_empty(player):
+    def get_empty():
         return Board(
             board=np.zeros(
                 (col, row)
             ),
             state=PLAY,
-            player=player
         )
 
-    def __init__(self, board: np.ndarray, player, state):
+    def __init__(self, board: np.ndarray, state):
         self.board = board
         self.state = state
         self.stack = np.array([np.count_nonzero(board[:, i]) for i in range(row)])
-        self.player = player
 
     def play_action(self, action):
         """
@@ -34,9 +32,9 @@ class Board:
         :return:
         """
 
-        new_board = -1 * self.board.copy()
-        count = col - self.stack[action]
-        new_board[count][action] = -1 * self.player
+        new_board = self.board.copy() * -1
+        count = col - self.stack[action] - 1
+        new_board[count][action] = 1
         state = None
 
         pos_x, pos_y = action, count
@@ -62,7 +60,6 @@ class Board:
 
         return Board(
             board=new_board,
-            player=-1 * self.player,
             state=state
         )
 
@@ -79,7 +76,6 @@ class Board:
         return Board(
             board=self.board.copy(),
             state=self.state,
-            player=self.player
         )
 
     def copy(self):

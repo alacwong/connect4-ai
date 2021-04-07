@@ -50,7 +50,7 @@ class MockPolicyModel(PolicyModel):
             if i not in valid_actions:
                 dist[i] = 0
 
-        return dist/ np.sum(dist)
+        return dist / np.sum(dist)
 
 
 class AlphaValueModel(ValueModel):
