@@ -12,10 +12,11 @@ class Board:
     """
 
     @staticmethod
-    def get_empty():
+    def empty():
         return Board(
             board=np.zeros(
-                (col, row)
+                (col, row),
+                dtype=int
             ),
             state=PLAY,
         )
@@ -51,7 +52,10 @@ class Board:
 
                 # terminal board state connect 4!
                 if count >= 4:
-                    state = WIN
+                    return Board(
+                        board=new_board,
+                        state=WIN
+                    )
 
         if np.sum(self.stack) == (col * row - 1) and not state:
             state = DRAW
@@ -80,4 +84,7 @@ class Board:
 
     def copy(self):
         return self.__copy__()
+
+    def __str__(self):
+        return str(self.board)
 

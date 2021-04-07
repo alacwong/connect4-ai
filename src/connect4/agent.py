@@ -92,4 +92,9 @@ class MiniMaxAgent(Agent):
     Agent plays using minimax with alpha beta pruning
     using value network as a partial configuration function
     """
-    pass
+
+    def update_board(self, action: int):
+        pass
+
+    def play(self) -> int:
+        pass
