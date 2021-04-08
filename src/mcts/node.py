@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from constants import simulation_constant
 from connect4.util import Board
+from constants import simulation_constant
 
 
 class Node:
@@ -21,7 +21,7 @@ class Node:
         self.parent = parent
         self.is_terminal = is_terminal
 
-    def ucb_score(self):
+    def ucb_score(self, exploration_factor: float):
         """
         Ucb score of node
         computed as Q(s, a) + U(s, a)
@@ -29,13 +29,13 @@ class Node:
         U(s,a) = prior_probability / 1 + visit_count
         :return:
         """
-        u = self.probability / 1 + self.visit_count
+        u = exploration_factor * self.probability / 1 + self.visit_count
         q = (1 - simulation_constant) * self.expected_reward + (
                 (simulation_constant * self.simulated_reward) / (1 + self.visit_count)
         )
         return u + q
 
-    def select_node(self) -> Node:
+    def select_node(self, exploration_factor: float) -> Node:
         """
         returns descendant with best
         :return:
@@ -48,11 +48,11 @@ class Node:
         max_ucb = 0
         selected_child = None
         for child in self.children:  # traverse path of greatest ucb
-            if child.ucb_score() > max_ucb:
+            if child.ucb_score(exploration_factor) > max_ucb:
                 selected_child = child
-                max_ucb = child.ucb_score()
+                max_ucb = child.ucb_score(exploration_factor)
 
-        return selected_child.select_node()
+        return selected_child.select_node(exploration_factor)
 
     def update_reward(self, reward=None):
         """

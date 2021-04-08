@@ -1,5 +1,5 @@
 """ Monte carlo tree search"""
-from constants import max_iterations, row, PLAY, WIN, DRAW
+from constants import max_iterations, row, PLAY, WIN, DRAW, exploration_constant
 from mcts.node import Node
 from ml.model import ValueModel, PolicyModel
 import numpy as np
@@ -32,12 +32,18 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
     :return:
     """
 
+    # Need to implement decreasing exploration factor
+    # Need to stochastically select best moves during training
+    # Need to update value to use mean with visit count and count total reward instead
+
     num_iterations = 0
 
     current_node = root
 
     while num_iterations < max_iterations:
-        node = current_node.select_node()
+
+        exploration_factor = (0.1 + num_iterations / max_iterations) * exploration_constant
+        node = current_node.select_node(exploration_factor)
 
         if not node.is_terminal:
             expand_board(node, policy_model, value_model)
