@@ -69,14 +69,6 @@ def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueMo
     valid_actions = current_board.get_valid_actions()
     dist = policy_network.compute_policy(current_board.board, valid_actions)
 
-    # remove illegal actions from action distribution
-    for i in range(row):
-        if i not in valid_actions:
-            dist[i] = 0
-
-    # normalize distribution
-    dist = dist / np.sum(dist)
-
     for action in valid_actions:
         new_board = current_board.play_action(action)
 
@@ -118,7 +110,6 @@ def simulate(node, policy):
             num_moves = 0
 
             while end_simulation:
-                print('simulating')
                 actions = board.get_valid_actions()
                 dist = policy.compute_policy(board.board, actions)
 
@@ -134,5 +125,6 @@ def simulate(node, policy):
                 else:   # win/loss
                     if num_moves % 2 == 0:
                         simulated_reward += 1
+                    end_simulation = False
 
         return simulated_reward / len(node.children)

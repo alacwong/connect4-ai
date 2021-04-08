@@ -75,4 +75,5 @@ class Node:
             # update if change
             if total_reward / len(self.children) != self.simulated_reward:
                 self.simulated_reward = total_reward / len(self.children)
-                self.parent.update_reward()
+                if self.parent:
+                    self.parent.update_reward()

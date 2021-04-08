@@ -46,7 +46,7 @@ class Board:
             x, y = pos_x, pos_y
             count = 0
 
-            while 0 <= x < row and 0 <= y < col and new_board[y][x] == 1:
+            while state != WIN and 0 <= x < row and 0 <= y < col and new_board[y][x] == 1:
                 count += 1
                 x, y = x + dir_x, y + dir_y
 
@@ -70,9 +70,9 @@ class Board:
     def get_valid_actions(self) -> Set:
 
         actions = set()
-        for elem in self.stack:
-            if elem < col:
-                actions.add(elem)
+        for action, count in enumerate(self.stack):
+            if count < col:
+                actions.add(action)
 
         return actions
 
