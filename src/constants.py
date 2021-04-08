@@ -13,7 +13,8 @@ directions = (
 )
 
 simulation_constant = 0.5
-exploration_constant = 2
+exploration_constant = 5
+exploration_temperature = 0.2
 
 DRAW = 3
 WIN = 1

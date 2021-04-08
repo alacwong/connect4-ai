@@ -1,5 +1,5 @@
 """ Monte carlo tree search"""
-from constants import max_iterations, row, PLAY, WIN, DRAW, exploration_constant
+from constants import max_iterations, row, PLAY, WIN, DRAW, exploration_constant, exploration_temperature
 from mcts.node import Node
 from ml.model import ValueModel, PolicyModel
 import numpy as np
@@ -52,18 +52,24 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
 
         num_iterations += 1
 
-    # choose optimal
-    # max_visit, optimal_child = 0, None
-    # for child in root.children:
-    #     if child.visit_count > max_visit:
-    #         max_visit = child.visit_count
-    #         optimal_child = child
 
-    # choose stochastically
-    dist = np.array([child.visit_count for child in root.children])
-    dist /= np.sum(dist)
-    action = np.random.choice(np.arange(len(root.children)), p=dist)
-    return root.children[action]
+    chosen_child = None
+    # sample first 7 moves stochastically
+    if num_iterations < 7:
+        tao = 1 / exploration_temperature
+
+        dist = np.array([child.visit_count ** tao for child in root.children])
+        dist /= np.sum(dist)
+        action = np.random.choice(np.arange(len(root.children)), p=dist)
+        chosen_child = root.children[action]
+    else:   # choose optimal
+        max_visit = 0
+        for child in root.children:
+            if child.visit_count > max_visit:
+                max_visit = child.visit_count
+                chosen_child = child
+
+    return chosen_child
 
 
 def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueModel):
