@@ -98,3 +98,15 @@ class MiniMaxAgent(Agent):
 
     def play(self) -> int:
         pass
+
+
+class HumanAgent(Agent):
+    """
+    Agent plays with human input
+    """
+
+    def update_board(self, action: int):
+        pass
+
+    def play(self) -> int:
+        pass

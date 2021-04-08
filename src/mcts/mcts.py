@@ -52,7 +52,6 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
 
         num_iterations += 1
 
-
     chosen_child = None
     # sample first 7 moves stochastically
     if num_iterations < 7:
@@ -62,7 +61,7 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
         dist /= np.sum(dist)
         action = np.random.choice(np.arange(len(root.children)), p=dist)
         chosen_child = root.children[action]
-    else:   # choose optimal
+    else:  # choose optimal
         max_visit = 0
         for child in root.children:
             if child.visit_count > max_visit:

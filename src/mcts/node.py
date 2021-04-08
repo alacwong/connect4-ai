@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from connect4.util import Board
 from constants import simulation_constant
+import numpy as np
 
 
 class Node:
@@ -29,7 +30,7 @@ class Node:
         U(s,a) = prior_probability / 1 + visit_count
         :return:
         """
-        u = exploration_factor * self.probability / 1 + self.visit_count
+        u = exploration_factor * np.sqrt(self.probability / 1 + self.visit_count)
         q = (1 - simulation_constant) * self.expected_reward + (
                 (simulation_constant * self.simulated_reward) / (1 + self.visit_count)
         )
