@@ -52,13 +52,18 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
 
         num_iterations += 1
 
-    max_visit, optimal_child = 0, None
-    for child in root.children:
-        if child.visit_count > max_visit:
-            max_visit = child.visit_count
-            optimal_child = child
+    # choose optimal
+    # max_visit, optimal_child = 0, None
+    # for child in root.children:
+    #     if child.visit_count > max_visit:
+    #         max_visit = child.visit_count
+    #         optimal_child = child
 
-    return optimal_child
+    # choose stochastically
+    dist = np.array([child.visit_count for child in root.children])
+    dist /= np.sum(dist)
+    action = np.random.choice(np.arange(len(root.children)), p=dist)
+    return root.children[action]
 
 
 def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueModel):
@@ -103,7 +108,7 @@ def simulate(node, policy):
         # compute actual reward
         if node.board.state == WIN:
             return 1
-        else:   # must be draw
+        else:  # must be draw
             return 0.5
     else:
         simulated_reward = 0
@@ -128,7 +133,7 @@ def simulate(node, policy):
                 elif board.state == DRAW:
                     simulated_reward += 0.5
                     end_simulation = False
-                else:   # win/loss
+                else:  # win/loss
                     if num_moves % 2 == 0:
                         simulated_reward += 1
                     end_simulation = False
