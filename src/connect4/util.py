@@ -16,7 +16,7 @@ class Board:
         return Board(
             board=np.zeros(
                 (col, row),
-                dtype=int
+                dtype='int'
             ),
             state=PLAY,
         )

@@ -3,6 +3,7 @@ from constants import max_iterations, row, PLAY, WIN, DRAW, exploration_constant
 from mcts.node import Node
 from ml.model import ValueModel, PolicyModel
 import numpy as np
+from numba import jit
 
 
 # ucb = Q(s,a) + u(s,a)
@@ -21,6 +22,7 @@ import numpy as np
 # expand node's children
 # simulate each of the node's children using policy distribution
 
+@jit(nopython=True)
 def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: PolicyModel) -> Node:
     """
     Run monte carlo tree search
@@ -41,7 +43,7 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
     current_node = root
 
     while num_iterations < max_iterations:
-
+        print(num_iterations)
         exploration_factor = (0.1 + num_iterations / max_iterations) * exploration_constant
         node = current_node.select_node(exploration_factor)
 
@@ -71,6 +73,7 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
     return chosen_child
 
 
+@jit(nopython=True)
 def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueModel):
     """
     Expand node's children
@@ -100,6 +103,7 @@ def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueMo
         )
 
 
+@jit(nopython=True)
 def simulate(node, policy):
     """
     Simulate game end of game by sampling actions from policy

@@ -30,7 +30,7 @@ class Node:
         U(s,a) = prior_probability / 1 + visit_count
         :return:
         """
-        u = exploration_factor * np.sqrt(self.probability / 1 + self.visit_count)
+        u = exploration_factor * np.sqrt(self.probability / (1 + self.visit_count))
         if self.visit_count:
             simulated_value = self.total_simulated_reward / self.visit_count
         else:
