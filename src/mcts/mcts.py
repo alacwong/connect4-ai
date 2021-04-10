@@ -114,33 +114,33 @@ def simulate(node, policy):
         if node.board.state == WIN:
             return 1
         else:  # must be draw
-            return 0.5
+            return 0
     else:
         simulated_reward = 0
 
         # compute expected reward through simulation
-        for child in node.children:
-            board = child.board.copy()
+        board = node.board.copy()
 
-            end_simulation = True
-            num_moves = 0
+        end_simulation = True
+        num_moves = 0
 
-            while end_simulation:
-                actions = board.get_valid_actions()
-                dist = policy.compute_policy(board.board, actions)
+        while end_simulation:
+            actions = board.get_valid_actions()
+            dist = policy.compute_policy(board.board, actions)
 
-                # randomly sample from distribution
-                action = np.random.choice(np.arange(row), p=dist)
-                board = board.play_action(action)
+            # randomly sample from distribution
+            action = np.random.choice(np.arange(row), p=dist)
+            board = board.play_action(action)
 
-                if board.state == PLAY:
-                    num_moves += 1
-                elif board.state == DRAW:
-                    simulated_reward += 0.5
-                    end_simulation = False
-                else:  # win/loss
-                    if num_moves % 2 == 0:
-                        simulated_reward += 1
-                    end_simulation = False
+            if board.state == PLAY:
+                num_moves += 1
+            elif board.state == DRAW:
+                end_simulation = False
+            else:
+                if num_moves % 2 == 0:  # Win
+                    simulated_reward += 1
+                else:  # Loss
+                    simulated_reward -= 1
+                end_simulation = False
 
-        return simulated_reward / len(node.children)
+        return simulated_reward

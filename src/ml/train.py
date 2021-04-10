@@ -51,7 +51,7 @@ def get_value_network():
             keras.Input(shape=(col * row)),
             keras.layers.Dense(col * row, activation='relu'),
             keras.layers.Dense(col * row, activation='relu'),
-            keras.layers.Dense(1, activation='sigmoid')
+            keras.layers.Dense(1, activation='tanh')
         ]
     )
 
@@ -81,7 +81,7 @@ def record_tree(root: Node):
             for child in node.children:
                 q.append(child)
 
-        value[str(node.board.board)].append(node.simulated_reward)
+        value[str(node.board.board)].append(node.total_simulated_reward)
 
         dist = [0] * row
 
@@ -122,7 +122,7 @@ def get_cnn_value_model():
             keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
             keras.layers.Flatten(),
             keras.layers.Dense(col * row, activation='relu'),
-            keras.layers.Dense(1, activation='sigmoid')
+            keras.layers.Dense(1, activation='tanh')
         ]
     )
     model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
