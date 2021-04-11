@@ -14,11 +14,17 @@ Plan for training networks (from mcts self play)
 (batches may not be necessary due to simulations averaging out values, will try without or with small batches)
 """
 
+import tensorflow as tf
 from tensorflow import keras
 from constants import col, row
 from mcts.node import Node
 from collections import deque, defaultdict
 import numpy as np
+import time
+import os
+
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
 def get_policy_network():
@@ -130,5 +136,9 @@ def get_cnn_value_model():
 
 
 if __name__ == '__main__':
-    cnn = get_cnn_value_model()
-    print(cnn.summary())
+    my_model = get_value_network()
+    start = time.time()
+    board = np.zeros((1, 42))
+    pred = my_model(board, training=False)
+    print(pred.numpy()[0][0])
+    print(f'{time.time() - start} s')

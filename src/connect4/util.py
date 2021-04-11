@@ -1,9 +1,13 @@
 """
 Connect 4 board logic
 """
-from constants import row, col, directions, WIN, PLAY, DRAW
+from __future__ import annotations
+
+from typing import List, Set
+
 import numpy as np
-from typing import Set
+
+from constants import row, col, directions, WIN, PLAY, DRAW
 
 
 class Board:
@@ -87,4 +91,3 @@ class Board:
 
     def __str__(self):
         return str(self.board)
-

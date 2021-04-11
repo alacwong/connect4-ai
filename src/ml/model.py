@@ -62,7 +62,7 @@ class AlphaValueModel(ValueModel):
             self.network = get_value_network()
 
     def compute_value(self, state) -> float:
-        return self.network.predict(state.reshape((1, col * row)))[0][0]
+        return self.network(state.reshape((1, col * row)), training=False).numpy()[0][0]
 
 
 class AlphaPolicyModel(PolicyModel):
@@ -74,7 +74,7 @@ class AlphaPolicyModel(PolicyModel):
             self.network = get_policy_network()
 
     def compute_policy(self, state: np.ndarray, valid_actions) -> np.array:
-        dist = self.network.predict(state.reshape((1, col * row)))[0]
+        dist = self.network(state.reshape((1, col * row))).numpy()[0]
         for i in range(row):
             if i not in valid_actions:
                 dist[i] = 0
