@@ -1,6 +1,5 @@
 """ Monte carlo tree search"""
-from constants import max_iterations, row, PLAY, WIN, DRAW, exploration_constant, exploration_temperature, \
-    simulation_constant
+from constants import max_iterations, row, PLAY, WIN, DRAW, exploration_constant, simulation_constant
 from mcts.node import Node
 from ml.model import ValueModel, PolicyModel
 import numpy as np
@@ -57,20 +56,23 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
             expand_board(node, policy_model, value_model)
             reward = simulate(node, policy_model)
             node.update_reward(reward)
+        else:
+            if node.board.state == DRAW:
+                node.update_reward(0)
+            else:   # has to be win
+                node.update_reward(1)
 
         num_iterations += 1
-    print(root)
+
     chosen_child = None
     # sample first 7 moves stochastically
-    if num_iterations < 7:
-        tao = 1 / exploration_temperature
-
-        dist = np.array([child.visit_count ** tao for child in root.children])
-        dist /= np.sum(dist)
+    if root.depth < 8:
+        dist = np.array([child.visit_count for child in root.children])
+        dist = dist / np.sum(dist)
         action = np.random.choice(np.arange(len(root.children)), p=dist)
         chosen_child = root.children[action]
     else:  # choose optimal
-        max_visit = 0
+        max_visit = -5
         for child in root.children:
             if child.visit_count > max_visit:
                 max_visit = child.visit_count
@@ -103,7 +105,8 @@ def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueMo
                 probability=dist[action],
                 board=new_board,
                 parent=node,
-                is_terminal=new_board.state != PLAY
+                is_terminal=new_board.state != PLAY,
+                depth=node.depth
             )
         )
 

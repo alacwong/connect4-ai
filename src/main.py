@@ -5,7 +5,7 @@ from connect4.util import Board
 import time
 
 if __name__ == '__main__':
-    print('Hello world!')
+    print('Connect 4 Ai')
 
     alpha_value = AlphaValueModel()
     alpha_policy = AlphaPolicyModel()

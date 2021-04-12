@@ -41,7 +41,7 @@ class RandomAgent(Agent):
         """
 
         actions = self.board.get_valid_actions()
-        action = np.random.choice(actions)
+        action = np.random.choice(np.array(list(actions)))
         self.board = self.board.play_action(action)
         return action
 
@@ -59,7 +59,7 @@ class MCTSAgent(Agent):
     """
 
     def __init__(self, board: Board, player: int, value_network: ValueModel, policy_network: PolicyModel):
-        self.tree = Node(board=board, action_id=0)
+        self.tree = Node(board=board, action_id=0, depth=0)
         self.root = self.tree
         self.board = board
         self.player = player
@@ -82,7 +82,7 @@ class MCTSAgent(Agent):
         """
 
         # traverse tree
-        for child in self.root:
+        for child in self.root.children:
             if child.action_id == action:
                 self.root = child
 

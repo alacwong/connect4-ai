@@ -10,7 +10,7 @@ class Node:
     Tree Node from monte carlo tree search
     """
 
-    def __init__(self, board: Board, action_id, expected_reward=0, probability=0, parent=None, is_terminal=False):
+    def __init__(self, board: Board, action_id, expected_reward=0, probability=0, parent=None, is_terminal=False, depth=0):
 
         self.board = board
         self.action_id = action_id
@@ -21,6 +21,7 @@ class Node:
         self.probability = probability  # probability of current node being played
         self.parent = parent
         self.is_terminal = is_terminal
+        self.depth = depth
 
     def ucb_score(self, exploration_factor: float, prior_factor):
         """
@@ -45,7 +46,6 @@ class Node:
         returns descendant with best
         :return:
         """
-        self.visit_count += 1
 
         if not len(self.children) or self.is_terminal:  # terminal or leaf
             return self
@@ -66,7 +66,7 @@ class Node:
         :param reward:
         :return:
         """
-        # print('update', reward, self.action_id)
+        self.visit_count += 1
         self.total_simulated_reward += reward
         if self.parent:
             self.parent.update_reward(-reward)
