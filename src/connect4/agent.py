@@ -4,7 +4,7 @@ Agent class for different nn models
 
 from abc import ABC, abstractmethod
 import numpy as np
-from connect4.util import Board
+from connect4.board import Board
 from mcts.node import Node
 from mcts.mcts import monte_carlo_tree_search
 from ml.model import ValueModel, PolicyModel

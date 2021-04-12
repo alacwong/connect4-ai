@@ -4,7 +4,7 @@ Game play for
 
 from connect4.agent import Agent
 from constants import PLAY
-from connect4.util import Board
+from connect4.board import Board
 import time
 from numba import jit
 
