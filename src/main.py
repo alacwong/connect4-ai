@@ -6,7 +6,6 @@ import time
 
 if __name__ == '__main__':
     print('Hello world!')
-    start = time.time()
 
     alpha_value = AlphaValueModel()
     alpha_policy = AlphaPolicyModel()
@@ -24,4 +23,3 @@ if __name__ == '__main__':
     )
 
     run(agent_1, agent_2)
-    print(f'{time.time() - start} s')

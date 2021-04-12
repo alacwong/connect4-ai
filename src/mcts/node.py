@@ -22,7 +22,7 @@ class Node:
         self.parent = parent
         self.is_terminal = is_terminal
 
-    def ucb_score(self, exploration_factor: float):
+    def ucb_score(self, exploration_factor: float, prior_factor):
         """
         Ucb score of node
         computed as Q(s, a) + U(s, a)
@@ -32,32 +32,33 @@ class Node:
         """
         u = exploration_factor * np.sqrt(self.probability / (1 + self.visit_count))
         if self.visit_count:
-            simulated_value = self.total_simulated_reward / self.visit_count
+            simulated_value = - 1 * self.total_simulated_reward
         else:
             simulated_value = 0
-        q = (1 - simulation_constant) * self.expected_reward + (
-                (simulation_constant * simulated_value) / (1 + self.visit_count)
+        q = (1 - prior_factor) * self.expected_reward + (
+            (prior_factor * simulated_value)
         )
         return u + q
 
-    def select_node(self, exploration_factor: float) -> Node:
+    def select_node(self, exploration_factor: float, prior_factor: float) -> Node:
         """
         returns descendant with best
         :return:
         """
         self.visit_count += 1
 
-        if not self.children or self.is_terminal:  # terminal or leaf
+        if not len(self.children) or self.is_terminal:  # terminal or leaf
             return self
 
-        max_ucb = 0
+        max_ucb = -100
         selected_child = None
         for child in self.children:  # traverse path of greatest ucb
-            if child.ucb_score(exploration_factor) > max_ucb:
+            ucb = child.ucb_score(exploration_factor, prior_factor)
+            if ucb > max_ucb:
                 selected_child = child
-                max_ucb = child.ucb_score(exploration_factor)
+                max_ucb = ucb
 
-        return selected_child.select_node(exploration_factor)
+        return selected_child.select_node(exploration_factor, prior_factor)
 
     def update_reward(self, reward):
         """
@@ -65,7 +66,22 @@ class Node:
         :param reward:
         :return:
         """
-
+        # print('update', reward, self.action_id)
         self.total_simulated_reward += reward
         if self.parent:
-            self.parent.update_reward(reward)
+            self.parent.update_reward(-reward)
+
+    def __str__(self):
+        """
+        pretty print node
+        """
+        children = ''
+        for child in self.children:
+            if child.visit_count:
+                value = -1 * child.total_simulated_reward / child.visit_count
+            else:
+                value = 0
+            children += f'{child.action_id}: [value: {value}, visited: {child.visit_count}]\n'
+        return f"""Value: {self.total_simulated_reward / (self.visit_count + 1)} Visited: {self.visit_count}
+                {children}
+                """

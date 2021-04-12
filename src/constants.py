@@ -1,7 +1,7 @@
 
 # Connect 4 constants
-row = 6
-col = 7
+row = 7
+col = 6
 directions = (
     (0, 1),
     (1, 0),
@@ -14,9 +14,9 @@ directions = (
 )
 
 # MCTS constants
-max_iterations = 100
+max_iterations = 175
 simulation_constant = 0.5
-exploration_constant = 5
+exploration_constant = 3
 exploration_temperature = 0.2
 
 # RL constants

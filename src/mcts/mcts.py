@@ -1,9 +1,9 @@
 """ Monte carlo tree search"""
-from constants import max_iterations, row, PLAY, WIN, DRAW, exploration_constant, exploration_temperature
+from constants import max_iterations, row, PLAY, WIN, DRAW, exploration_constant, exploration_temperature, \
+    simulation_constant
 from mcts.node import Node
 from ml.model import ValueModel, PolicyModel
 import numpy as np
-from numba import jit
 import warnings
 
 # Numba has a lot of warnings due to python objects
@@ -47,8 +47,12 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
 
     while num_iterations < max_iterations:
         print(num_iterations)
-        exploration_factor = (0.1 + num_iterations / max_iterations) * exploration_constant
-        node = current_node.select_node(exploration_factor)
+        exploration_factor = (
+                (0.1 + (max_iterations - num_iterations) / max_iterations) *
+                exploration_constant
+        )
+        prior_factor = ((max_iterations - num_iterations) / max_iterations) * simulation_constant
+        node = current_node.select_node(exploration_factor, prior_factor)
 
         if not node.is_terminal:
             expand_board(node, policy_model, value_model)
@@ -56,7 +60,7 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
             node.update_reward(reward)
 
         num_iterations += 1
-
+    print(root)
     chosen_child = None
     # sample first 7 moves stochastically
     if num_iterations < 7:
@@ -105,7 +109,6 @@ def expand_board(node: Node, policy_network: PolicyModel, value_network: ValueMo
         )
 
 
-@jit
 def simulate(node, policy):
     """
     Simulate game end of game by sampling actions from policy
@@ -127,10 +130,9 @@ def simulate(node, policy):
         # compute expected reward through simulation
         board = node.board.copy()
 
-        end_simulation = True
         num_moves = 0
 
-        while end_simulation:
+        while True:
             actions = board.get_valid_actions()
             dist = policy.compute_policy(board.board, actions)
 
@@ -141,12 +143,12 @@ def simulate(node, policy):
             if board.state == PLAY:
                 num_moves += 1
             elif board.state == DRAW:
-                end_simulation = False
+                break
             else:
                 if num_moves % 2 == 0:  # Win
                     simulated_reward += 1
                 else:  # Loss
                     simulated_reward -= 1
-                end_simulation = False
+                break
 
         return simulated_reward
