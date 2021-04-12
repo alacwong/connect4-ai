@@ -14,9 +14,9 @@ directions = (
 )
 
 # MCTS constants
-max_iterations = 175
+max_iterations = 200
 simulation_constant = 0.5
-exploration_constant = 3
+exploration_constant = 8
 exploration_temperature = 0.2
 
 # RL constants

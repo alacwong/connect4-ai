@@ -82,6 +82,4 @@ class Node:
             else:
                 value = 0
             children += f'{child.action_id}: [value: {value}, visited: {child.visit_count}]\n'
-        return f"""Value: {self.total_simulated_reward / (self.visit_count + 1)} Visited: {self.visit_count}
-                {children}
-                """
+        return f'Value: {self.total_simulated_reward / (self.visit_count + 1)} Visited: {self.visit_count}\n{children}'

@@ -46,7 +46,6 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
     current_node = root
 
     while num_iterations < max_iterations:
-        print(num_iterations)
         exploration_factor = (
                 (0.1 + (max_iterations - num_iterations) / max_iterations) *
                 exploration_constant
