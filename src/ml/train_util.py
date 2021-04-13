@@ -13,7 +13,7 @@ Plan for training networks (from mcts self play)
 
 (batches may not be necessary due to simulations averaging out values, will try without or with small batches)
 """
-from constants import col, row
+from constants import row
 from mcts.node import Node
 from collections import deque, defaultdict
 import numpy as np
@@ -49,9 +49,3 @@ def record_tree(root: Node):
             dist[child.action_id] = child.visit_count
 
         prior[str(node.board)].append(np.array(dist))
-
-
-def train():
-    """
-    Train ai with
-    """

@@ -48,9 +48,8 @@ class RandomAgent(Agent):
     def update_board(self, action):
         self.board = self.board.play_action(action)
 
-    def __init__(self, board: Board, player):
+    def __init__(self, board: Board):
         self.board = board
-        self.player = player
 
 
 class MCTSAgent(Agent):
@@ -58,11 +57,10 @@ class MCTSAgent(Agent):
     Agent plays using mcts guided by policy and value network
     """
 
-    def __init__(self, board: Board, player: int, value_network: ValueModel, policy_network: PolicyModel):
+    def __init__(self, board: Board, value_network: ValueModel, policy_network: PolicyModel):
         self.tree = Node(board=board, action_id=0, depth=0)
         self.root = self.tree
         self.board = board
-        self.player = player
         self.value_model = value_network
         self.policy_model = policy_network
 

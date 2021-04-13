@@ -12,14 +12,12 @@ if __name__ == '__main__':
 
     agent_1 = MCTSAgent(
         board=Board.empty(),
-        player=1,
         value_network=alpha_value,
         policy_network=alpha_policy
     )
 
     agent_2 = RandomAgent(
-        board=Board.empty(),
-        player=-1
+        board=Board.empty()
     )
 
     start = time.time()
