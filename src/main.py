@@ -22,4 +22,6 @@ if __name__ == '__main__':
         player=-1
     )
 
+    start = time.time()
     run(agent_1, agent_2)
+    print(f' {time.time() - start} s')

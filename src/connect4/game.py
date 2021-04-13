@@ -6,7 +6,7 @@ from connect4.agent import Agent
 from constants import PLAY
 from connect4.board import Board
 import time
-from numba import jit
+
 
 def run(player_0: Agent, player_1: Agent):
     """
@@ -24,9 +24,7 @@ def run(player_0: Agent, player_1: Agent):
 
     is_terminal = True
 
-    start = time.time()
     while is_terminal:
-        # print(f'Turn {num_turns}')
         turn = num_turns % 2
 
         # play
@@ -34,8 +32,6 @@ def run(player_0: Agent, player_1: Agent):
         players[(num_turns + 1) % 2].update_board(action)
 
         board = board.play_action(action)
-        # print(board)
         num_turns += 1
         is_terminal = board.state == PLAY
 
-    print(f' {is_terminal} {time.time() - start} s')
