@@ -8,6 +8,7 @@ from connect4.board import Board
 from mcts.node import Node
 from mcts.mcts import monte_carlo_tree_search
 from ml.model import ValueModel, PolicyModel
+from constants import HUMAN, MCTS, MINIMAX, RANDOM
 
 
 class Agent(ABC):
@@ -25,6 +26,20 @@ class Agent(ABC):
         """
         update agent's board state
         :return:
+        """
+        pass
+
+    @abstractmethod
+    def get_agent_id(self):
+        """
+        get agent's unique id
+        """
+        pass
+
+    @abstractmethod
+    def get_agent_name(self):
+        """
+        get agent's name
         """
         pass
 
@@ -48,8 +63,20 @@ class RandomAgent(Agent):
     def update_board(self, action):
         self.board = self.board.play_action(action)
 
-    def __init__(self, board: Board):
-        self.board = board
+    def __init__(self):
+        self.board = Board.empty()
+
+    def get_agent_id(self):
+        """
+        get agent's unique id
+        """
+        pass
+
+    def get_agent_name(self):
+        """
+        get agent's name
+        """
+        pass
 
 
 class MCTSAgent(Agent):
@@ -57,10 +84,10 @@ class MCTSAgent(Agent):
     Agent plays using mcts guided by policy and value network
     """
 
-    def __init__(self, board: Board, value_network: ValueModel, policy_network: PolicyModel):
-        self.tree = Node(board=board, action_id=0, depth=0)
+    def __init__(self,value_network: ValueModel, policy_network: PolicyModel):
+        self.board = Board.empty()
+        self.tree = Node(board=self.board, action_id=0, depth=0)
         self.root = self.tree
-        self.board = board
         self.value_model = value_network
         self.policy_model = policy_network
 
@@ -84,6 +111,18 @@ class MCTSAgent(Agent):
             if child.action_id == action:
                 self.root = child
 
+    def get_agent_id(self):
+        """
+        get agent's unique id
+        """
+        pass
+
+    def get_agent_name(self):
+        """
+        get agent's name
+        """
+        pass
+
 
 class MiniMaxAgent(Agent):
     """
@@ -97,6 +136,18 @@ class MiniMaxAgent(Agent):
     def play(self) -> int:
         pass
 
+    def get_agent_id(self):
+        """
+        get agent's unique id
+        """
+        pass
+
+    def get_agent_name(self):
+        """
+        get agent's name
+        """
+        pass
+
 
 class HumanAgent(Agent):
     """
@@ -108,3 +159,33 @@ class HumanAgent(Agent):
 
     def play(self) -> int:
         pass
+
+    def get_agent_id(self):
+        """
+        get agent's unique id
+        """
+        pass
+
+    def get_agent_name(self):
+        """
+        get agent's name
+        """
+        pass
+
+
+class AgentFactory:
+
+    @staticmethod
+    def get_agent(agent_type, **kwargs) -> Agent:
+        """
+        Factory method to get agent
+        """
+
+        if agent_type == MCTS:
+            return MCTSAgent(**kwargs)
+        elif agent_type == HUMAN:
+            pass
+        elif agent_type == RANDOM:
+            pass
+        elif agent_type == MINIMAX:
+            pass

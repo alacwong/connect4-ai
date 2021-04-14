@@ -11,14 +11,11 @@ if __name__ == '__main__':
     alpha_policy = AlphaPolicyModel()
 
     agent_1 = MCTSAgent(
-        board=Board.empty(),
         value_network=alpha_value,
         policy_network=alpha_policy
     )
 
-    agent_2 = RandomAgent(
-        board=Board.empty()
-    )
+    agent_2 = RandomAgent()
 
     start = time.time()
     run(agent_1, agent_2)

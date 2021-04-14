@@ -24,3 +24,9 @@ DRAW = 3
 WIN = 1
 LOSS = 2
 PLAY = 0
+
+# Agent types
+MINIMAX = 'minimax'
+MCTS = 'monte_carlo_tree_search'
+HUMAN = 'human'
+RANDOM = 'random'
