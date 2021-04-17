@@ -3,10 +3,6 @@ from constants import max_iterations, row, PLAY, WIN, DRAW, exploration_constant
 from mcts.node import Node
 from ml.model import ValueModel, PolicyModel
 import numpy as np
-import warnings
-
-# Numba has a lot of warnings due to python objects
-warnings.filterwarnings('ignore')
 
 
 # ucb = Q(s,a) + u(s,a)

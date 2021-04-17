@@ -84,7 +84,7 @@ class MCTSAgent(Agent):
     Agent plays using mcts guided by policy and value network
     """
 
-    def __init__(self,value_network: ValueModel, policy_network: PolicyModel):
+    def __init__(self, value_network: ValueModel, policy_network: PolicyModel):
         self.board = Board.empty()
         self.tree = Node(board=self.board, action_id=0, depth=0)
         self.root = self.tree
@@ -170,6 +170,24 @@ class HumanAgent(Agent):
         """
         get agent's name
         """
+        pass
+
+
+class QAgent(Agent):
+    """
+    Deep q learning agent
+    """
+
+    def play(self) -> int:
+        pass
+
+    def update_board(self, action: int):
+        pass
+
+    def get_agent_id(self):
+        pass
+
+    def get_agent_name(self):
         pass
 
 

@@ -1,10 +1,28 @@
+"""
+Train neural network
+
+Plan for training networks (from mcts self play)
+
+1. Randomly select previous agent to train
+2. Play n games with m simulations per move
+3. For each game, record mcts distributions and value from tree.
+4. Split n games into k batches.
+5. Average state values for each batch.
+6. Train networks on batches.
+7. Iterate with updated networks.
+
+(batches may not be necessary due to simulations averaging out values, will try without or with small batches)
+"""
+
 from abc import ABC, abstractmethod
 from constants import PLAY
 from connect4.board import Board
-from connect4.agent import Agent, MCTSAgent
+from connect4.agent import Agent, MCTSAgent, AgentFactory
 from ml.model import AlphaPolicyModel, AlphaValueModel
 import numpy as np
 import uuid
+from ml.train_util import record_tree
+
 
 class Trainer(ABC):
 
@@ -16,7 +34,7 @@ class Trainer(ABC):
         pass
 
     @abstractmethod
-    def _draw_opponent(self) -> Agent:
+    def _sample_opponent(self) -> Agent:
         """
         Create adversarial agent to train mcts agent against
         """
@@ -28,6 +46,50 @@ class Trainer(ABC):
         get training data generated from self play
         """
         pass
+
+
+class GameLog:
+    """
+    data model for tracking training data games
+    """
+
+    def __init__(self, agents):
+        self.log = {}
+        for agent in agents:
+            self.log = {
+                agent.get_agent_id(): {
+                    'w': 0,
+                    'l': 1
+                }
+            }
+
+    def update(self, agent1: Agent, agent2: Agent, result):
+        """
+        Update game log
+        """
+
+        if result == 1:
+            self.log[agent1.get_agent_id()]['w'] += 1
+            self.log[agent2.get_agent_id()]['l'] += 1
+        else:
+            self.log[agent1.get_agent_id()]['l'] += 1
+            self.log[agent2.get_agent_id()]['w'] += 1
+
+    def add_new_agent(self, agent_id):
+        """
+        add new agent
+        """
+        self.log[agent_id] = {
+            'w': 0,
+            'l': 1
+        }
+
+    def get_log(self):
+        """
+        returns copy of log
+        """
+
+        return self.log.copy()
 
 
 class RandomSingle(Trainer):
@@ -50,7 +112,7 @@ class RandomSingle(Trainer):
 
             board = Board.empty()
             num_turns = 0
-            opposition = self._draw_opponent()
+            opposition = self._sample_opponent()
 
             flip = np.random.randint(0, 2)
             if flip == 0:
@@ -85,22 +147,48 @@ class RandomSingle(Trainer):
 
             num_games += 1
 
-    def _record_game(self, result: int, agent: Agent, opposition: Agent):
+    def _record_game(self, result: int, agent: MCTSAgent, opposition: Agent):
         """
         record game data
         """
 
-        if agent.get_agent_id() == agent.get_agent_id():
-            # record data from both agents if they have the same id
-            pass
-        else:
-            pass
+        prior, value = record_tree(agent.root)
+        self.stats['games'].append(
+            {
+                'result': result,
+                'prior': prior,
+                'value': value,
+            }
+        )
 
-    def _draw_opponent(self) -> Agent:
+        if opposition.get_agent_id() == agent.get_agent_id():
+            # record data from both agents if they have the same id
+            opposition_prior, opposition_value = record_tree(opposition.node)
+            opposition_result = 1 if result == 0 else 0
+            self.stats['games'].append(
+                {
+                    'result': opposition_result,
+                    'prior': opposition_prior,
+                    'value': opposition_value
+                }
+            )
+
+    def _sample_opponent(self) -> Agent:
         """
         Draws opponent randomly based on win rate vs other agents
         """
-        pass
+        log = self.game_log.get_log()
+
+        agents = np.array([game for game in log])
+        dist = np.array(
+            [game['l'] / (game['l'] + game['w']) for game in log]
+        )
+        selected_agent = agents[np.random.choice(np.arange(len(agents)), p=dist)]
+        return AgentFactory.get_agent(
+            self.agents[selected_agent]['agent_type'],
+            **self.agents[selected_agent]['kwargs']
+        )
+
 
     def _get_agent(self, agent_id) -> Agent:
         """
@@ -111,12 +199,13 @@ class RandomSingle(Trainer):
 
     def __init__(self, max_games):
         self.max_games = max_games
-        self.stats = {}
+        self.stats = {'games': []}
         self.current_agent = uuid.uuid4()
         self.agents = {
             uuid.uuid4(): {},
-
         }
+        self.game_log = GameLog([])
+
 
 
 class RandomMulti(Trainer):
@@ -130,5 +219,5 @@ class RandomMulti(Trainer):
     def train(self):
         pass
 
-    def _draw_opponent(self) -> Agent:
+    def _sample_opponent(self) -> Agent:
         pass

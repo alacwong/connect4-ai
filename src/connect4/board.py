@@ -3,7 +3,7 @@ Connect 4 board logic
 """
 from __future__ import annotations
 
-from typing import List, Set
+from typing import Set
 
 import numpy as np
 

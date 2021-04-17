@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from connect4.board import Board
-from constants import simulation_constant
 import numpy as np
 
 

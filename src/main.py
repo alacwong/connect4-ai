@@ -1,7 +1,6 @@
 from ml.model import AlphaPolicyModel, AlphaValueModel
 from connect4.agent import RandomAgent, MCTSAgent
 from connect4.game import run
-from connect4.board import Board
 import time
 
 if __name__ == '__main__':
