@@ -18,6 +18,7 @@ from abc import ABC, abstractmethod
 from constants import PLAY
 from connect4.board import Board
 from connect4.agent import Agent, MCTSAgent, AgentFactory
+from ml.game_log import GameLog
 from ml.model import AlphaPolicyModel, AlphaValueModel
 import numpy as np
 import uuid
@@ -46,50 +47,6 @@ class Trainer(ABC):
         get training data generated from self play
         """
         pass
-
-
-class GameLog:
-    """
-    data model for tracking training data games
-    """
-
-    def __init__(self, agents):
-        self.log = {}
-        for agent in agents:
-            self.log = {
-                agent.get_agent_id(): {
-                    'w': 0,
-                    'l': 1
-                }
-            }
-
-    def update(self, agent1: Agent, agent2: Agent, result):
-        """
-        Update game log
-        """
-
-        if result == 1:
-            self.log[agent1.get_agent_id()]['w'] += 1
-            self.log[agent2.get_agent_id()]['l'] += 1
-        else:
-            self.log[agent1.get_agent_id()]['l'] += 1
-            self.log[agent2.get_agent_id()]['w'] += 1
-
-    def add_new_agent(self, agent_id):
-        """
-        add new agent
-        """
-        self.log[agent_id] = {
-            'w': 0,
-            'l': 1
-        }
-
-    def get_log(self):
-        """
-        returns copy of log
-        """
-
-        return self.log.copy()
 
 
 class RandomSingle(Trainer):
@@ -189,7 +146,6 @@ class RandomSingle(Trainer):
             **self.agents[selected_agent]['kwargs']
         )
 
-
     def _get_agent(self, agent_id) -> Agent:
         """
         Generate agent models
@@ -205,7 +161,6 @@ class RandomSingle(Trainer):
             uuid.uuid4(): {},
         }
         self.game_log = GameLog([])
-
 
 
 class RandomMulti(Trainer):
