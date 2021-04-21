@@ -25,7 +25,8 @@ def record_tree(root: Node, min_leaf_value=10):
         # add to q
         if not node.is_terminal:
             for child in node.children:
-                q.append(child)
+                if child.visit_count > min_leaf_value:
+                    q.append(child)
 
         value[str(node.board.board)].append(node.total_simulated_reward/ node.visit_count)
 

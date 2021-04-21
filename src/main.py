@@ -2,6 +2,7 @@ from ml.model import AlphaPolicyModel, AlphaValueModel
 from connect4.agent import RandomAgent, MCTSAgent
 from connect4.game import run
 import time
+from ml.train_util import record_tree
 
 if __name__ == '__main__':
     print('Connect 4 Ai')

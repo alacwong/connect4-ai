@@ -5,7 +5,7 @@ Game play for
 from connect4.agent import Agent
 from constants import PLAY
 from connect4.board import Board
-
+from ml.train_util import record_tree
 
 def run(player_0: Agent, player_1: Agent):
     """
