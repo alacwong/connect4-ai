@@ -4,9 +4,11 @@ Different neural network models
 
 from abc import ABC
 import numpy as np
-from src.constants import row, col
+from src.constants import row, col, device
 from src.ml.nn import get_value_network, get_policy_network
 from abc import abstractmethod
+import tensorflow as tf
+from src.ml.nn import device
 
 
 # Model interfaces
@@ -62,7 +64,8 @@ class AlphaValueModel(ValueModel):
             self.network = get_value_network()
 
     def compute_value(self, state) -> float:
-        return self.network(state.reshape((1, col * row)), training=False).numpy()[0][0]
+        with tf.device(device):
+            return self.network(state.reshape((1, col * row)), training=False).numpy()[0][0]
 
 
 class AlphaPolicyModel(PolicyModel):
@@ -74,7 +77,8 @@ class AlphaPolicyModel(PolicyModel):
             self.network = get_policy_network()
 
     def compute_policy(self, state: np.ndarray, valid_actions) -> np.array:
-        dist = self.network(state.reshape((1, col * row))).numpy()[0]
+        with tf.device(device ):              
+            dist = self.network(state.reshape((1, col * row))).numpy()[0]
         for i in range(row):
             if i not in valid_actions:
                 dist[i] = 0

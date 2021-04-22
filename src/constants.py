@@ -1,3 +1,4 @@
+import tensorflow as tf
 
 # Connect 4 constants
 row = 7
@@ -31,3 +32,9 @@ MCTS = 'monte_carlo_tree_search'
 HUMAN = 'human'
 RANDOM = 'random'
 QLEARN = 'deep_q_learning'
+
+# Hardware
+if tf.test.gpu_device_name() == '/device:GPU:0':
+    device = '/device:GPU:0'
+else:
+    device = '/device:CPU:0'
