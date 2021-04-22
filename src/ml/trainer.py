@@ -19,7 +19,7 @@ from src.constants import PLAY
 from src.connect4.board import Board
 from src.connect4.agent import Agent, MCTSAgent, AgentFactory
 from src.ml.game_log import GameLog
-from src.ml.model_wrapper import AlphaPolicyModel, AlphaValueModel
+from src.ml.wrapper import AlphaPolicyModel, AlphaValueModel
 import numpy as np
 import uuid
 from src.ml.train_util import record_tree

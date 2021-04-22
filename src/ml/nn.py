@@ -10,7 +10,7 @@ from src.ml.model import Model
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
-def get_cnn_policy_model():
+def get_cnn_policy_model() -> Model:
     """
     CNN architecture for policy model
     """
@@ -27,10 +27,10 @@ def get_cnn_policy_model():
             ]
         )
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-    return model
+    return Model.from_keras(model)
 
 
-def get_cnn_value_model():
+def get_cnn_value_model() -> Model:
     """
     CNN architecture for value model
     """
@@ -47,10 +47,10 @@ def get_cnn_value_model():
             ]
         )
         model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
-    return model
+    return Model.from_keras(model)
 
 
-def get_policy_network():
+def get_policy_network() -> Model:
     """
     policy architecture
     :return:
@@ -59,7 +59,7 @@ def get_policy_network():
     with tf.device(device):
         model = keras.Sequential(
             [
-                keras.Input((col * row)),
+                keras.Input(shape=(col * row), dtype='int64'),
                 keras.layers.Dense((col * row), activation='relu'),
                 keras.layers.Dense((col * row), activation='relu'),
                 keras.layers.Dense(row, activation='softmax')
@@ -67,10 +67,10 @@ def get_policy_network():
         )
 
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-    return model
+    return Model.from_keras(model)
 
 
-def get_value_network():
+def get_value_network() -> Model:
     """
     value network architecture
     :return:
@@ -78,7 +78,7 @@ def get_value_network():
     with tf.device(device):
         model = keras.Sequential(
             [
-                keras.Input(shape=(col * row)),
+                keras.Input(shape=(col * row), dtype='int64'),
                 keras.layers.Dense(col * row, activation='relu'),
                 keras.layers.Dense(col * row, activation='relu'),
                 keras.layers.Dense(1, activation='tanh')
@@ -86,7 +86,7 @@ def get_value_network():
         )
 
         model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
-    return model
+    return Model.from_keras(model)
 
 
 if __name__ == '__main__':

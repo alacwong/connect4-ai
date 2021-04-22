@@ -1,5 +1,5 @@
 import tensorflow as tf
-import numpy as np
+from src.constants import col, row
 
 
 class Model:
@@ -35,8 +35,8 @@ class Model:
         """
         Predict single input, this is ok cuz we only ever use that
         """
-        inp = np.array(inp, dtype=self.input_dtype)
+        inp = inp.reshape((1, col * row))
         self.interpreter.set_tensor(self.input_index, inp)
         self.interpreter.invoke()
         out = self.interpreter.get_tensor(self.output_index)
-        return out[0][0]
+        return out

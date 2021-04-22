@@ -1,4 +1,4 @@
-from ml.model_wrapper import AlphaPolicyModel, AlphaValueModel
+from ml.wrapper import AlphaPolicyModel, AlphaValueModel
 from connect4.agent import RandomAgent, MCTSAgent
 from connect4.game import run
 import time
