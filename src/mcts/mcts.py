@@ -1,7 +1,7 @@
 """ Monte carlo tree search"""
 from src.constants import max_iterations, row, PLAY, WIN, DRAW, exploration_constant, simulation_constant
 from src.mcts.node import Node
-from src.ml.model import ValueModel, PolicyModel
+from src.ml.model_wrapper import ValueModel, PolicyModel
 import numpy as np
 
 

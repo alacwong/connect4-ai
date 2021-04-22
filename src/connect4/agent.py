@@ -7,7 +7,7 @@ import numpy as np
 from src.connect4.board import Board
 from src.mcts.node import Node
 from src.mcts.mcts import monte_carlo_tree_search
-from src.ml.model import ValueModel, PolicyModel
+from src.ml.model_wrapper import ValueModel, PolicyModel
 from src.constants import HUMAN, MCTS, MINIMAX, RANDOM
 
 

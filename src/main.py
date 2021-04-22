@@ -1,8 +1,10 @@
-from ml.model import AlphaPolicyModel, AlphaValueModel
+from ml.model_wrapper import AlphaPolicyModel, AlphaValueModel
 from connect4.agent import RandomAgent, MCTSAgent
 from connect4.game import run
 import time
 from ml.train_util import record_tree
+
+# https://micwurm.medium.com/using-tensorflow-lite-to-speed-up-predictions-a3954886eb98
 
 if __name__ == '__main__':
     print('Connect 4 Ai')

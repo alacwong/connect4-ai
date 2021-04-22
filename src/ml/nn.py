@@ -5,7 +5,7 @@ import os
 import numpy as np
 from src.constants import device
 import tensorflow as tf
-
+from src.ml.model import Model
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -55,7 +55,7 @@ def get_policy_network():
     policy architecture
     :return:
     """
-    
+
     with tf.device(device):
         model = keras.Sequential(
             [
@@ -90,9 +90,34 @@ def get_value_network():
 
 
 if __name__ == '__main__':
-    my_model = get_value_network()
+    np.random.seed(0)
+    test_case = [
+        np.random.randint(2, size=42),
+        np.random.randint(2, size=42),
+        np.random.randint(2, size=42),
+        np.random.randint(2, size=42),
+        np.random.randint(2, size=42),
+        np.random.randint(2, size=42),
+        np.random.randint(2, size=42),
+        np.random.randint(2, size=42),
+        np.random.randint(2, size=42),
+    ]
+
+    raw_model = get_value_network()
+    lite_model = Model.from_keras(raw_model)
+    ans = []
     start = time.time()
-    board = np.zeros((1, 42))
-    pred = my_model(board, training=False)
-    print(pred.numpy()[0][0])
-    print(f'{time.time() - start} s')
+    for test in test_case:
+        ans.append(raw_model(test.reshape(1, 42)))
+    old = time.time() - start
+
+    lite_mode_pred = []
+    start = time.time()
+    for test in test_case:
+        lite_mode_pred.append(lite_model.predict(test.reshape(1, 42)))
+    lite_model_time = time.time() - start
+
+    for i in range(len(ans)):
+        print(f'Raw: {ans[i]} Lite: {lite_mode_pred[i]}')
+
+    print(f'Raw: {old} Lite: {lite_model_time} s')

@@ -1,85 +1,42 @@
-"""
-Different neural network models
-"""
-
-from abc import ABC
-import numpy as np
-from src.constants import row, col, device
-from src.ml.nn import get_value_network, get_policy_network
-from abc import abstractmethod
 import tensorflow as tf
-from src.ml.nn import device
+import numpy as np
 
 
-# Model interfaces
+class Model:
+    """
+    Lite model for efficient policy value rollouts
+    """
 
-class ValueModel(ABC):
+    @classmethod
+    def from_file(cls, path):
+        return Model(tf.lite.Interpreter(model_path=path))
 
-    @abstractmethod
-    def compute_value(self, state: np.ndarray) -> float:
-        """evaluate board state"""
-        pass
+    @classmethod
+    def from_keras(cls, model):
+        converter = tf.lite.TFLiteConverter.from_keras_model(model)
+        lite_model = converter.convert()
+        interpreter = tf.lite.Interpreter(model_content=lite_model)
+        return Model(interpreter)
 
+    def __init__(self, interpreter):
+        """ Set up model"""
+        self.interpreter = interpreter
+        self.interpreter.allocate_tensors()
+        input_det = self.interpreter.get_input_details()[0]
+        output_det = self.interpreter.get_output_details()[0]
+        self.input_index = input_det["index"]
+        self.output_index = output_det["index"]
+        self.input_shape = input_det["shape"]
+        self.output_shape = output_det["shape"]
+        self.input_dtype = input_det["dtype"]
+        self.output_dtype = output_det["dtype"]
 
-class PolicyModel(ABC):
-
-    @abstractmethod
-    def compute_policy(self, state: np.ndarray, valid_actions) -> np.array:
-        """Compute policy distribution of actions from state """
-        pass
-
-
-# Model Implementations
-
-class MockValueModel(ValueModel):
-
-    def compute_value(self, state) -> float:
-        return 0
-
-
-class MockPolicyModel(PolicyModel):
-
-    def compute_policy(self, state, valid_actions) -> np.array:
+    def predict(self, inp):
         """
-        Assume uniform
-        :param valid_actions:
-        :param state:
-        :return:
+        Predict single input, this is ok cuz we only ever use that
         """
-
-        dist = np.array([1 / row for _ in range(row)])
-        for i in range(row):
-            if i not in valid_actions:
-                dist[i] = 0
-
-        return dist / np.sum(dist)
-
-
-class AlphaValueModel(ValueModel):
-
-    def __init__(self, network=None):
-        # initial network, load from python,
-        # otherwise load from serialized file
-        if not network:
-            self.network = get_value_network()
-
-    def compute_value(self, state) -> float:
-        with tf.device(device):
-            return self.network(state.reshape((1, col * row)), training=False).numpy()[0][0]
-
-
-class AlphaPolicyModel(PolicyModel):
-
-    def __init__(self, network=None):
-        # initial network, load from python,
-        # otherwise load from serialized file
-        if not network:
-            self.network = get_policy_network()
-
-    def compute_policy(self, state: np.ndarray, valid_actions) -> np.array:
-        with tf.device(device ):              
-            dist = self.network(state.reshape((1, col * row))).numpy()[0]
-        for i in range(row):
-            if i not in valid_actions:
-                dist[i] = 0
-        return dist / np.sum(dist)
+        inp = np.array(inp, dtype=self.input_dtype)
+        self.interpreter.set_tensor(self.input_index, inp)
+        self.interpreter.invoke()
+        out = self.interpreter.get_tensor(self.output_index)
+        return out[0][0]
