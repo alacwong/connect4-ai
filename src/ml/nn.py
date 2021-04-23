@@ -10,7 +10,7 @@ from src.ml.model import Model
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
-def get_cnn_policy_model() -> Model:
+def get_cnn_policy_model():
     """
     CNN architecture for policy model
     """
@@ -27,10 +27,10 @@ def get_cnn_policy_model() -> Model:
             ]
         )
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-    return Model.from_keras(model)
+    return model
 
 
-def get_cnn_value_model() -> Model:
+def get_cnn_value_model():
     """
     CNN architecture for value model
     """
@@ -47,10 +47,10 @@ def get_cnn_value_model() -> Model:
             ]
         )
         model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
-    return Model.from_keras(model)
+    return model
 
 
-def get_policy_network() -> Model:
+def get_policy_network():
     """
     policy architecture
     :return:
@@ -67,10 +67,10 @@ def get_policy_network() -> Model:
         )
 
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-    return Model.from_keras(model)
+    return model
 
 
-def get_value_network() -> Model:
+def get_value_network():
     """
     value network architecture
     :return:
@@ -86,7 +86,7 @@ def get_value_network() -> Model:
         )
 
         model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
-    return Model.from_keras(model)
+    return model
 
 
 if __name__ == '__main__':

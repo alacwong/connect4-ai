@@ -9,6 +9,7 @@ from src.ml.nn import get_value_network, get_policy_network
 from abc import abstractmethod
 import tensorflow as tf
 from src.ml.nn import device
+from src.ml.model import Model
 
 
 # Model interfaces
@@ -61,7 +62,9 @@ class AlphaValueModel(ValueModel):
         # initial network, load from python,
         # otherwise load from serialized file
         if not network:
-            self.network = get_value_network()
+            self.network = Model.from_keras(get_value_network())
+        else:
+            self.network = Model.from_keras(network)
 
     def compute_value(self, state) -> float:
         return self.network.predict(state)[0][0]
@@ -73,7 +76,9 @@ class AlphaPolicyModel(PolicyModel):
         # initial network, load from python,
         # otherwise load from serialized file
         if not network:
-            self.network = get_policy_network()
+            self.network = Model.from_keras(get_policy_network())
+        else:
+            self.network = Model.from_keras(network)
 
     def compute_policy(self, state: np.ndarray, valid_actions) -> np.array:
         dist = self.network.predict(state)[0]

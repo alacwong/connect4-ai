@@ -37,9 +37,3 @@ class GameLog:
             'l': 1
         }
 
-    def get_log(self):
-        """
-        returns copy of log
-        """
-
-        return self.log.copy()

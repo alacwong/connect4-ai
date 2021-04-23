@@ -15,15 +15,18 @@ Plan for training networks (from mcts self play)
 """
 
 from abc import ABC, abstractmethod
-from src.constants import PLAY, DRAW
-from src.connect4.board import Board
-from src.connect4.agent import Agent, MCTSAgent, AgentFactory
-from src.ml.game_log import GameLog
-from src.ml.wrapper import AlphaPolicyModel, AlphaValueModel
+import csv
 import numpy as np
 import uuid
+
+from ml.model import Model
 from src.ml.train_util import record_tree
-import csv
+from src.constants import PLAY, DRAW
+from src.connect4.board import Board
+from src.connect4.agent import Agent, AgentFactory
+from src.ml.game_log import GameLog
+from src.ml.nn import get_value_network, get_policy_network
+from src.ml.wrapper import AlphaPolicyModel, AlphaValueModel
 
 
 class Trainer(ABC):
@@ -57,16 +60,57 @@ class RandomSingle(Trainer):
 
     def train(self):
         """
+        main training loop
+        1. generate raw agent
+        2. self play raw agent and previous iterations **
+        3. grab training data from self play
+        4. train on new neural network
+        5. iterate/repeat
         """
 
-    def _train(self, agent):
+        num_iterations = 0
+
+        value_network = get_value_network()
+        policy_network = get_policy_network()
+        kwargs = {
+            'value_network': AlphaValueModel(network=value_network),
+            'policy_network': AlphaPolicyModel(network=policy_network)
+        }
+        agent = AgentFactory.get_agent('mcts', kwargs=kwargs)
+        self.agents = {agent.get_agent_type(): kwargs}
+        self.current_agent = agent
+
+        # may increase during later iterations
+        max_games = 100
+
+        while num_iterations < self.max_iterations:
+            self._train(agent, max_games)
+            self._serialize()
+            value_network = get_value_network()
+            policy_network = get_policy_network()
+            states = np.genfromtxt('generated/states.csv', delimiter=',', dtype='int64')
+            priors = np.genfromtxt('generated/priors.csv.csv', delimiter=',', dtype='float32')
+            values = np.genfromtxt('generated/values.csv.csv', delimiter=',', dtype='float32')
+            value_network.fit(states, values)
+            policy_network.fit(states, priors)
+            kwargs = {
+                'value_network': AlphaValueModel(network=value_network),
+                'policy_network': AlphaPolicyModel(network=policy_network)
+            }
+            agent_type = 'todo'
+            value_network.save(f'generated/{agent_type}')
+            policy_network.save(f'generated/{agent_type}')
+            agent = AgentFactory.get_agent('mcts', **kwargs)
+            num_iterations += 1
+
+    def _train(self, agent, max_games):
         """
         Train ai with
         """
 
         num_games = 0
 
-        while num_games < self.max_games:
+        while num_games < max_games:
 
             board = Board.empty()
             num_turns = 0
@@ -97,6 +141,7 @@ class RandomSingle(Trainer):
                 else:
                     num_turns += 1
 
+            # Updates result of the game
             if board.state == DRAW:
                 self.game_log.update(agent, opposition, 1)
                 self.game_log.update(agent, opposition, 0)
@@ -111,6 +156,14 @@ class RandomSingle(Trainer):
 
             num_games += 1
 
+    def _serialize(self):
+        self._serialize_data(self.values, 'generated/values.csv')
+        self.values = []
+        self._serialize_data(self.priors, 'generated/priors.csv')
+        self.priors = []
+        self._serialize_data(self.states, 'generated/states.csv')
+        self.states = []
+
     def _update_data(self, agent_1: Agent, agent_2: Agent):
         """ Record training data from """
 
@@ -121,12 +174,7 @@ class RandomSingle(Trainer):
             self.states.append(states)
 
             if len(self.values) > 50:
-                self._serialize_data(self.values, 'generated/values.csv')
-                self.values = []
-                self._serialize_data(self.priors, 'generated/priors.csv')
-                self.priors = []
-                self._serialize_data(self.states, 'generated/states.csv')
-                self.states = []
+                self._serialize()
 
         if agent_1.get_agent_type() == self.current_agent:
             update(agent_1)
@@ -142,13 +190,11 @@ class RandomSingle(Trainer):
                 for element in cluster:
                     writer.writerow(element)
 
-
-
     def _sample_opponent(self) -> Agent:
         """
         Draws opponent randomly based on win rate vs other agents
         """
-        log = self.game_log.get_log()
+        log = self.game_log.log
 
         agents = np.array([game for game in log])
         dist = np.array(
@@ -160,8 +206,8 @@ class RandomSingle(Trainer):
             **self.agents[selected_agent]['kwargs']
         )
 
-    def __init__(self, max_games):
-        self.max_games = max_games
+    def __init__(self, max_iterations):
+        self.max_iterations = max_iterations
         self.stats = {'games': []}
         self.current_agent = uuid.uuid4()
         self.agents = {
