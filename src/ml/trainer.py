@@ -19,7 +19,6 @@ import csv
 import numpy as np
 import uuid
 
-from ml.model import Model
 from src.ml.train_util import record_tree
 from src.constants import PLAY, DRAW
 from src.connect4.board import Board
@@ -85,12 +84,12 @@ class RandomSingle(Trainer):
 
         while num_iterations < self.max_iterations:
             self._train(agent, max_games)
-            self._serialize()
+
             value_network = get_value_network()
             policy_network = get_policy_network()
-            states = np.genfromtxt('generated/states.csv', delimiter=',', dtype='int64')
-            priors = np.genfromtxt('generated/priors.csv.csv', delimiter=',', dtype='float32')
-            values = np.genfromtxt('generated/values.csv.csv', delimiter=',', dtype='float32')
+            states = np.array(self.states, dtype=int)
+            priors = np.array(self.priors)
+            values = np.array(self.values)
             value_network.fit(states, values)
             policy_network.fit(states, priors)
             kwargs = {
@@ -101,6 +100,7 @@ class RandomSingle(Trainer):
             value_network.save(f'generated/{agent_type}')
             policy_network.save(f'generated/{agent_type}')
             agent = AgentFactory.get_agent('mcts', **kwargs)
+            # TODO need to clear training data after fitting
             num_iterations += 1
 
     def _train(self, agent, max_games):
@@ -156,14 +156,6 @@ class RandomSingle(Trainer):
 
             num_games += 1
 
-    def _serialize(self):
-        self._serialize_data(self.values, 'generated/values.csv')
-        self.values = []
-        self._serialize_data(self.priors, 'generated/priors.csv')
-        self.priors = []
-        self._serialize_data(self.states, 'generated/states.csv')
-        self.states = []
-
     def _update_data(self, agent_1: Agent, agent_2: Agent):
         """ Record training data from """
 
@@ -172,9 +164,6 @@ class RandomSingle(Trainer):
             self.priors.append(priors)
             self.values.append(values)
             self.states.append(states)
-
-            if len(self.values) > 50:
-                self._serialize()
 
         if agent_1.get_agent_type() == self.current_agent:
             update(agent_1)
