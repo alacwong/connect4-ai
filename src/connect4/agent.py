@@ -30,7 +30,7 @@ class Agent(ABC):
         pass
 
     @abstractmethod
-    def get_agent_id(self):
+    def get_agent_type(self):
         """
         get agent's unique id
         """
@@ -66,7 +66,7 @@ class RandomAgent(Agent):
     def __init__(self):
         self.board = Board.empty()
 
-    def get_agent_id(self):
+    def get_agent_type(self):
         """
         get agent's unique id
         """
@@ -96,6 +96,8 @@ class MCTSAgent(Agent):
         :return:
         """
         node = monte_carlo_tree_search(self.root, self.value_model, self.policy_model)
+        node.parent = None
+        self.tree = node
         self.root = node
         return node.action_id
 
@@ -111,7 +113,7 @@ class MCTSAgent(Agent):
             if child.action_id == action:
                 self.root = child
 
-    def get_agent_id(self):
+    def get_agent_type(self):
         """
         get agent's unique id
         """
@@ -136,7 +138,7 @@ class MiniMaxAgent(Agent):
     def play(self) -> int:
         pass
 
-    def get_agent_id(self):
+    def get_agent_type(self):
         """
         get agent's unique id
         """
@@ -160,7 +162,7 @@ class HumanAgent(Agent):
     def play(self) -> int:
         pass
 
-    def get_agent_id(self):
+    def get_agent_type(self):
         """
         get agent's unique id
         """
@@ -184,7 +186,7 @@ class QAgent(Agent):
     def update_board(self, action: int):
         pass
 
-    def get_agent_id(self):
+    def get_agent_type(self):
         pass
 
     def get_agent_name(self):

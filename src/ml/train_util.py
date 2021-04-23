@@ -1,4 +1,4 @@
-from src.constants import row
+from src.constants import row, col
 from src.mcts.node import Node
 from collections import deque, defaultdict
 import numpy as np
@@ -13,8 +13,9 @@ def record_tree(root: Node, min_leaf_value=10):
     :return:
     """
 
-    prior = defaultdict(list)
-    value = defaultdict(list)
+    priors = []
+    value = []
+    states = []
 
     q = deque([root])
 
@@ -28,13 +29,14 @@ def record_tree(root: Node, min_leaf_value=10):
                 if child.visit_count > min_leaf_value:
                     q.append(child)
 
-        value[str(node.board.board)].append(node.total_simulated_reward/ node.visit_count)
+        states.append(str(node.board.board.reshape(col * row))[1:-1])
+        value.append(node.total_simulated_reward / node.visit_count)
 
         dist = [0] * row
-
         for child in node.children:
             dist[child.action_id] = child.visit_count
+        dist /= np.sum(dist)
 
-        prior[str(node.board)].append(np.array(dist))
+        priors.append(str(dist)[1:-1])
 
-    return prior, value
+    return priors, value, states

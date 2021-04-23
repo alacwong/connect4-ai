@@ -10,7 +10,7 @@ class GameLog:
         self.log = {}
         for agent in agents:
             self.log = {
-                agent.get_agent_id(): {
+                agent.get_agent_type(): {
                     'w': 0,
                     'l': 1
                 }
@@ -22,11 +22,11 @@ class GameLog:
         """
 
         if result == 1:
-            self.log[agent1.get_agent_id()]['w'] += 1
-            self.log[agent2.get_agent_id()]['l'] += 1
+            self.log[agent1.get_agent_type()]['w'] += 1
+            self.log[agent2.get_agent_type()]['l'] += 1
         else:
-            self.log[agent1.get_agent_id()]['l'] += 1
-            self.log[agent2.get_agent_id()]['w'] += 1
+            self.log[agent1.get_agent_type()]['l'] += 1
+            self.log[agent2.get_agent_type()]['w'] += 1
 
     def add_new_agent(self, agent_id):
         """

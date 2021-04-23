@@ -6,6 +6,8 @@ from src.connect4.agent import Agent
 from src.constants import PLAY
 from src.connect4.board import Board
 from src.ml.train_util import record_tree
+import time
+
 
 def run(player_0: Agent, player_1: Agent):
     """
@@ -23,6 +25,8 @@ def run(player_0: Agent, player_1: Agent):
 
     is_terminal = True
 
+    start = time.time()
+
     while is_terminal:
         turn = num_turns % 2
 
@@ -34,3 +38,4 @@ def run(player_0: Agent, player_1: Agent):
         num_turns += 1
         is_terminal = board.state == PLAY
 
+    print(f' {time.time() - start} s')

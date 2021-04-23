@@ -15,7 +15,7 @@ Plan for training networks (from mcts self play)
 """
 
 from abc import ABC, abstractmethod
-from src.constants import PLAY
+from src.constants import PLAY, DRAW
 from src.connect4.board import Board
 from src.connect4.agent import Agent, MCTSAgent, AgentFactory
 from src.ml.game_log import GameLog
@@ -23,6 +23,7 @@ from src.ml.wrapper import AlphaPolicyModel, AlphaValueModel
 import numpy as np
 import uuid
 from src.ml.train_util import record_tree
+import csv
 
 
 class Trainer(ABC):
@@ -96,39 +97,52 @@ class RandomSingle(Trainer):
                 else:
                     num_turns += 1
 
-            if (num_turns % 2 == 0 and player_1.get_agent_name() == agent.get_agent_name()) \
-                    or (num_turns % 2 == 1 and player_2.get_agent_name() == agent.get_agent_name()):
-                self._record_game(1, agent, opposition)
+            if board.state == DRAW:
+                self.game_log.update(agent, opposition, 1)
+                self.game_log.update(agent, opposition, 0)
+            elif turn == 0 and flip == 0:
+                self.game_log.update(agent, opposition, 1)
+            elif turn == 0 and flip == 1:
+                self.game_log.update(agent, opposition, 0)
+            elif turn == 1 and flip == 0:
+                self.game_log.update(agent, opposition, 0)
             else:
-                self._record_game(0, agent, opposition)
+                self.game_log.update(agent, opposition, 1)
 
             num_games += 1
 
-    def _record_game(self, result: int, agent: MCTSAgent, opposition: Agent):
-        """
-        record game data
-        """
+    def _update_data(self, agent_1: Agent, agent_2: Agent):
+        """ Record training data from """
 
-        prior, value = record_tree(agent.root)
-        self.stats['games'].append(
-            {
-                'result': result,
-                'prior': prior,
-                'value': value,
-            }
-        )
+        def update(agent):
+            priors, values, states = record_tree(agent.tree)
+            self.priors.append(priors)
+            self.values.append(values)
+            self.states.append(states)
 
-        if opposition.get_agent_id() == agent.get_agent_id():
-            # record data from both agents if they have the same id
-            opposition_prior, opposition_value = record_tree(opposition.node)
-            opposition_result = 1 if result == 0 else 0
-            self.stats['games'].append(
-                {
-                    'result': opposition_result,
-                    'prior': opposition_prior,
-                    'value': opposition_value
-                }
-            )
+            if len(self.values) > 50:
+                self._serialize_data(self.values, 'generated/values.csv')
+                self.values = []
+                self._serialize_data(self.priors, 'generated/priors.csv')
+                self.priors = []
+                self._serialize_data(self.states, 'generated/states.csv')
+                self.states = []
+
+        if agent_1.get_agent_type() == self.current_agent:
+            update(agent_1)
+
+        if agent_2.get_agent_type() == self.current_agent:
+            update(agent_2)
+
+    @staticmethod
+    def _serialize_data(data, path):
+        with open(path, 'a') as f:
+            writer = csv.writer(f)
+            for cluster in data:
+                for element in cluster:
+                    writer.writerow(element)
+
+
 
     def _sample_opponent(self) -> Agent:
         """
@@ -146,13 +160,6 @@ class RandomSingle(Trainer):
             **self.agents[selected_agent]['kwargs']
         )
 
-    def _get_agent(self, agent_id) -> Agent:
-        """
-        Generate agent models
-        """
-        kwargs = self.agents[agent_id]
-        return MCTSAgent(**kwargs)
-
     def __init__(self, max_games):
         self.max_games = max_games
         self.stats = {'games': []}
@@ -161,6 +168,9 @@ class RandomSingle(Trainer):
             uuid.uuid4(): {},
         }
         self.game_log = GameLog([])
+        self.priors = []
+        self.values = []
+        self.states = []
 
 
 class RandomMulti(Trainer):
