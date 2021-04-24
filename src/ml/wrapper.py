@@ -4,12 +4,11 @@ Different neural network models
 
 from abc import ABC
 import numpy as np
-from src.constants import row, col, device
+from src.constants import row
 from src.ml.nn import get_value_network, get_policy_network
 from abc import abstractmethod
-import tensorflow as tf
-from src.ml.nn import device
 from src.ml.model import Model
+import tensorflow as tf
 
 
 # Model interfaces
@@ -20,6 +19,7 @@ class ValueModel(ABC):
     def compute_value(self, state: np.ndarray) -> float:
         """evaluate board state"""
         pass
+
 
 
 class PolicyModel(ABC):
@@ -69,6 +69,12 @@ class AlphaValueModel(ValueModel):
     def compute_value(self, state) -> float:
         return self.network.predict(state)[0][0]
 
+    @classmethod
+    def load_from_file(cls, path):
+        """Load model from file"""
+        model = tf.keras.models.load_model(path)
+        return cls(network=model)
+
 
 class AlphaPolicyModel(PolicyModel):
 
@@ -86,3 +92,9 @@ class AlphaPolicyModel(PolicyModel):
             if i not in valid_actions:
                 dist[i] = 0
         return dist / np.sum(dist)
+
+    @classmethod
+    def load_from_file(cls, path):
+        """Load model from file"""
+        model = tf.keras.models.load_model(path)
+        return cls(network=model)

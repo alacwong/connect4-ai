@@ -5,7 +5,6 @@ Game play for
 from src.connect4.agent import Agent
 from src.constants import PLAY
 from src.connect4.board import Board
-from src.ml.train_util import record_tree
 import time
 
 
@@ -32,7 +31,7 @@ def run(player_0: Agent, player_1: Agent):
 
         # play
         action = players[turn].play()
-        players[(num_turns + 1) % 2].update_board(action)
+        players[(num_turns + 1) % 2].update_state(action)
 
         board = board.play_action(action)
         num_turns += 1

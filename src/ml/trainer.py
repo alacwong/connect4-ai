@@ -15,17 +15,17 @@ Plan for training networks (from mcts self play)
 """
 
 from abc import ABC, abstractmethod
-import csv
 import numpy as np
 import uuid
 
 from src.ml.train_util import record_tree
-from src.constants import PLAY, DRAW
+from src.constants import PLAY, DRAW, MCTS
 from src.connect4.board import Board
 from src.connect4.agent import Agent, AgentFactory
 from src.ml.game_log import GameLog
 from src.ml.nn import get_value_network, get_policy_network
 from src.ml.wrapper import AlphaPolicyModel, AlphaValueModel
+from datetime import datetime
 
 
 class Trainer(ABC):
@@ -69,38 +69,35 @@ class RandomSingle(Trainer):
 
         num_iterations = 0
 
-        value_network = get_value_network()
-        policy_network = get_policy_network()
+        value_network, policy_network = get_value_network(), get_policy_network()
         kwargs = {
             'value_network': AlphaValueModel(network=value_network),
             'policy_network': AlphaPolicyModel(network=policy_network)
         }
         agent = AgentFactory.get_agent('mcts', kwargs=kwargs)
-        self.agents = {agent.get_agent_type(): kwargs}
-        self.current_agent = agent
+        self.agents = {agent.get_agent_type(): agent}
+        self.current_agent = agent.get_agent_type()
 
         # may increase during later iterations
-        max_games = 100
+        max_games = 1
 
         while num_iterations < self.max_iterations:
             self._train(agent, max_games)
 
-            value_network = get_value_network()
-            policy_network = get_policy_network()
-            states = np.array(self.states, dtype=int)
-            priors = np.array(self.priors)
-            values = np.array(self.values)
+            value_network, policy_network = get_value_network(), get_policy_network()
+            states, priors, values = np.array(self.states, dtype=int), np.array(self.priors), np.array(self.values)
             value_network.fit(states, values)
             policy_network.fit(states, priors)
+            agent_type = 'todo'
             kwargs = {
                 'value_network': AlphaValueModel(network=value_network),
-                'policy_network': AlphaPolicyModel(network=policy_network)
+                'policy_network': AlphaPolicyModel(network=policy_network),
+                'agent_type': agent_type
             }
-            agent_type = 'todo'
             value_network.save(f'generated/{agent_type}')
             policy_network.save(f'generated/{agent_type}')
             agent = AgentFactory.get_agent('mcts', **kwargs)
-            # TODO need to clear training data after fitting
+            self.priors, self.values, self.states = [], [], []
             num_iterations += 1
 
     def _train(self, agent, max_games):
@@ -132,7 +129,7 @@ class RandomSingle(Trainer):
 
                 # play
                 action = players[turn].play()
-                players[(num_turns + 1) % 2].update_board(action)
+                players[(num_turns + 1) % 2].update_state(action)
 
                 board = board.play_action(action)
 
@@ -161,23 +158,15 @@ class RandomSingle(Trainer):
 
         def update(agent):
             priors, values, states = record_tree(agent.tree)
-            self.priors.append(priors)
-            self.values.append(values)
-            self.states.append(states)
+            self.priors.extend(priors)
+            self.values.extend(values)
+            self.states.extend(states)
 
         if agent_1.get_agent_type() == self.current_agent:
             update(agent_1)
 
         if agent_2.get_agent_type() == self.current_agent:
             update(agent_2)
-
-    @staticmethod
-    def _serialize_data(data, path):
-        with open(path, 'a') as f:
-            writer = csv.writer(f)
-            for cluster in data:
-                for element in cluster:
-                    writer.writerow(element)
 
     def _sample_opponent(self) -> Agent:
         """
@@ -190,22 +179,24 @@ class RandomSingle(Trainer):
             [game['l'] / (game['l'] + game['w']) for game in log]
         )
         selected_agent = agents[np.random.choice(np.arange(len(agents)), p=dist)]
-        return AgentFactory.get_agent(
-            self.agents[selected_agent]['agent_type'],
-            **self.agents[selected_agent]['kwargs']
-        )
+        return self.agents[selected_agent]
 
-    def __init__(self, max_iterations):
+    def __init__(self, max_iterations, initial_value, initial_policy):
         self.max_iterations = max_iterations
-        self.stats = {'games': []}
-        self.current_agent = uuid.uuid4()
+        self.current_agent = str(uuid.uuid4())
         self.agents = {
-            uuid.uuid4(): {},
+            self.current_agent: AgentFactory.get_agent(
+                MCTS, **{
+                    'value_network': AlphaValueModel(initial_value),
+                    'policy_network': AlphaPolicyModel(initial_policy)
+                }
+            )
         }
         self.game_log = GameLog([])
         self.priors = []
         self.values = []
         self.states = []
+        self.save_dir = f'generated/{datetime.today().isoformat()}'
 
 
 class RandomMulti(Trainer):
@@ -221,3 +212,11 @@ class RandomMulti(Trainer):
 
     def _sample_opponent(self) -> Agent:
         pass
+
+
+if __name__ == '__main__':
+    print('Test training :)')
+    trainer = RandomSingle(max_iterations=5,
+                           initial_value=AlphaValueModel.load_from_file('generated/initial/value'),
+                           initial_policy=AlphaPolicyModel.load_from_file('generated/initial/policy'))
+    trainer.train()

@@ -9,6 +9,7 @@ from src.mcts.node import Node
 from src.mcts.mcts import monte_carlo_tree_search
 from src.ml.wrapper import ValueModel, PolicyModel
 from src.constants import HUMAN, MCTS, MINIMAX, RANDOM
+import uuid
 
 
 class Agent(ABC):
@@ -22,7 +23,7 @@ class Agent(ABC):
         pass
 
     @abstractmethod
-    def update_board(self, action: int):
+    def update_state(self, action: int):
         """
         update agent's board state
         :return:
@@ -37,9 +38,9 @@ class Agent(ABC):
         pass
 
     @abstractmethod
-    def get_agent_name(self):
+    def reset(self):
         """
-        get agent's name
+        Reset agent's memory to initial values
         """
         pass
 
@@ -60,7 +61,7 @@ class RandomAgent(Agent):
         self.board = self.board.play_action(action)
         return action
 
-    def update_board(self, action):
+    def update_state(self, action):
         self.board = self.board.play_action(action)
 
     def __init__(self):
@@ -70,13 +71,13 @@ class RandomAgent(Agent):
         """
         get agent's unique id
         """
-        pass
+        return 'random'
 
-    def get_agent_name(self):
+    def reset(self):
         """
-        get agent's name
+        Reset agent's memory to initial values
         """
-        pass
+        self.board = Board.empty()
 
 
 class MCTSAgent(Agent):
@@ -84,12 +85,13 @@ class MCTSAgent(Agent):
     Agent plays using mcts guided by policy and value network
     """
 
-    def __init__(self, value_network: ValueModel, policy_network: PolicyModel):
-        self.board = Board.empty()
-        self.tree = Node(board=self.board, action_id=0, depth=0)
+    def __init__(self, value_network: ValueModel, policy_network: PolicyModel, agent_type: str):
+        self.tree = Node(board=Board.empty(), action_id=0, depth=0)
         self.root = self.tree
         self.value_model = value_network
         self.policy_model = policy_network
+        self.agent_type = agent_type
+        self.agent_id = str(uuid.uuid4())
 
     def play(self) -> int:
         """
@@ -101,7 +103,7 @@ class MCTSAgent(Agent):
         self.root = node
         return node.action_id
 
-    def update_board(self, action):
+    def update_state(self, action):
         """
         Update current board position
         :param action:
@@ -117,13 +119,14 @@ class MCTSAgent(Agent):
         """
         get agent's unique id
         """
-        pass
+        return self.agent_type
 
-    def get_agent_name(self):
+    def reset(self):
         """
-        get agent's name
+        Reset agent's memory to initial values
         """
-        pass
+        self.tree = Node(board=Board.empty(), action_id=0, depth=0)
+        self.root = self.tree
 
 
 class MiniMaxAgent(Agent):
@@ -132,7 +135,7 @@ class MiniMaxAgent(Agent):
     using value network as a partial configuration function
     """
 
-    def update_board(self, action: int):
+    def update_state(self, action: int):
         pass
 
     def play(self) -> int:
@@ -144,9 +147,9 @@ class MiniMaxAgent(Agent):
         """
         pass
 
-    def get_agent_name(self):
+    def reset(self):
         """
-        get agent's name
+        Reset agent's memory to initial values
         """
         pass
 
@@ -156,7 +159,7 @@ class HumanAgent(Agent):
     Agent plays with human input
     """
 
-    def update_board(self, action: int):
+    def update_state(self, action: int):
         pass
 
     def play(self) -> int:
@@ -168,9 +171,9 @@ class HumanAgent(Agent):
         """
         pass
 
-    def get_agent_name(self):
+    def reset(self):
         """
-        get agent's name
+        Reset agent's memory to initial values
         """
         pass
 
@@ -183,13 +186,16 @@ class QAgent(Agent):
     def play(self) -> int:
         pass
 
-    def update_board(self, action: int):
+    def update_state(self, action: int):
         pass
 
     def get_agent_type(self):
         pass
 
-    def get_agent_name(self):
+    def reset(self):
+        """
+        Reset agent's memory to initial values
+        """
         pass
 
 
