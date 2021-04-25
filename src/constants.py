@@ -5,16 +5,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 # Connect 4 constants
 row = 7
 col = 6
-directions = (
-    (0, 1),
-    (1, 0),
-    (-1, 0),
-    (0, -1),
-    (1, 1),
-    (-1, -1),
-    (1, -1),
-    (-1, 1)
-)
 
 # MCTS constants
 max_iterations = 200

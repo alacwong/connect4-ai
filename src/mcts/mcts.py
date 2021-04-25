@@ -54,7 +54,7 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
         else:
             if node.board.state == DRAW:
                 node.update_reward(0)
-            else:   # has to be win
+            else:  # has to be win
                 node.update_reward(1)
 
         num_iterations += 1
@@ -66,7 +66,7 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
         action = np.random.choice(np.arange(len(root.children)), p=dist)
         chosen_child = root.children[action]
     else:  # choose optimal
-        max_visit = -5
+        max_visit = -1
         for child in root.children:
             if child.visit_count > max_visit:
                 max_visit = child.visit_count
@@ -131,11 +131,10 @@ def simulate(node, policy):
         while True:
             actions = board.get_valid_actions()
             dist = policy.compute_policy(board.board, actions)
-
             # randomly sample from distribution
+
             action = np.random.choice(np.arange(row), p=dist)
             board = board.play_action(action)
-
             if board.state == PLAY:
                 num_moves += 1
             elif board.state == DRAW:

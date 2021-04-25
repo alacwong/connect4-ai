@@ -26,7 +26,7 @@ def run(player_0: Agent, player_1: Agent):
 
     start = time.time()
 
-    while is_terminal:
+    while True:
         turn = num_turns % 2
 
         # play
@@ -35,6 +35,8 @@ def run(player_0: Agent, player_1: Agent):
 
         board = board.play_action(action)
         num_turns += 1
-        is_terminal = board.state == PLAY
+
+        if board.state != PLAY:
+            break
 
     print(f' {time.time() - start} s')

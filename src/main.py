@@ -13,7 +13,8 @@ if __name__ == '__main__':
 
     agent_1 = MCTSAgent(
         value_network=alpha_value,
-        policy_network=alpha_policy
+        policy_network=alpha_policy,
+        agent_type='mcts'
     )
 
     agent_2 = RandomAgent()

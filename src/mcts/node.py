@@ -49,7 +49,7 @@ class Node:
         if not len(self.children) or self.is_terminal:  # terminal or leaf
             return self
 
-        max_ucb = -100
+        max_ucb = -1000
         selected_child = None
         for child in self.children:  # traverse path of greatest ucb
             ucb = child.ucb_score(exploration_factor, prior_factor)

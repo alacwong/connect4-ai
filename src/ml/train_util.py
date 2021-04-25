@@ -38,8 +38,12 @@ def record_tree(root: Node, min_leaf_value=10):
         dist = [0] * row
         for child in node.children:
             dist[child.action_id] = child.visit_count
-        x = dist.copy()
-        dist /= np.sum(dist)
         priors.append(dist)
 
     return priors, value, states
+
+
+def preprocess_data():
+    """
+    Pre-process data into format
+    """

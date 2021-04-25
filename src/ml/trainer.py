@@ -26,6 +26,7 @@ from src.ml.game_log import GameLog
 from src.ml.nn import get_value_network, get_policy_network
 from src.ml.wrapper import AlphaPolicyModel, AlphaValueModel
 from datetime import datetime
+import pickle
 
 
 class Trainer(ABC):
@@ -71,17 +72,27 @@ class RandomSingle(Trainer):
         agent = self.agents[self.current_agent].copy()
 
         # may increase during later iterations
-        max_games = 1
+        max_games = 100
 
         while num_generations < self.max_generations:
-            print(f'Generation: {num_generations}')
+
             self._train(agent, max_games)
 
             # Train new model with
             value_network, policy_network = get_value_network(), get_policy_network()
             states, priors, values = np.array(self.states, dtype=int), np.array(self.priors), np.array(self.values)
-            value_network.fit(states, values)
-            policy_network.fit(states, priors)
+            with open('generated/datasets/large-data.pkl', 'wb+') as f:
+                pickle.dump(
+                    {
+                        'states': states,
+                        'priors': priors,
+                        'values': values
+                    }, f
+                )
+            exit()
+
+            value_network.fit(states, values, epochs=10, validation_split=0.3)
+            policy_network.fit(states, priors, epochs=10, validation_split=0.3)
 
             # Create new agent
             value_network = Model.from_keras(value_network)

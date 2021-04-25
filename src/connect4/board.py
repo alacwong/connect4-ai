@@ -7,7 +7,16 @@ from typing import Set
 
 import numpy as np
 
-from src.constants import row, col, directions, WIN, PLAY, DRAW
+from src.constants import row, col, WIN, PLAY, DRAW
+
+# Compute diagonal mapping and then cache
+diagonal_ref = np.ones((col, row), dtype='int')
+for index in range(-row + 1, row, 1):
+    diagonal = np.diag(diagonal_ref, index)
+    diagonal.setflags(write=True)
+    diagonal.fill(index)
+
+reverse_diagonal_ref = np.flipud(diagonal_ref)
 
 
 class Board:
@@ -25,10 +34,30 @@ class Board:
             state=PLAY,
         )
 
-    def __init__(self, board: np.ndarray, state):
+    def __init__(self, board: np.ndarray, state, stack=None):
         self.board = board
         self.state = state
-        self.stack = np.array([np.count_nonzero(board[:, i]) for i in range(row)])
+        if stack is None:
+            self.stack = np.array([np.count_nonzero(board[:, i]) for i in range(row)])
+        else:
+            self.stack = stack
+
+    @staticmethod
+    def _count_connected(array) -> int:
+        """
+        determines longest contiguous sequence of 1s
+        helper for function for detecting "4 in a row"
+        """
+        current_count = 0
+        max_count = 0
+        for tile in array:
+            if tile == 1:
+                current_count += 1
+            else:
+                max_count = max(max_count, current_count)
+                current_count = 0
+
+        return max(max_count, current_count)
 
     def play_action(self, action):
         """
@@ -37,40 +66,47 @@ class Board:
         :return:
         """
 
+        # Copy data and then play action with copied data
         new_board = self.board.copy() * -1
-        count = col - self.stack[action] - 1
+        stack = self.stack.copy()
+        count = col - stack[action] - 1
         new_board[count][action] = 1
-        state = None
+        stack[action] += 1
 
-        pos_x, pos_y = action, count
+        # Compute current state
+        state = PLAY
 
-        # terminal (check if win)
-        # TODO algorithm is wrong
-        # TODO rewrite in C for efficiency
-        for direction in directions:
-            dir_x, dir_y = direction
-            x, y = pos_x, pos_y
-            count = 0
-
-            while state != WIN and 0 <= x < row and 0 <= y < col and new_board[y][x] == 1:
-                count += 1
-                x, y = x + dir_x, y + dir_y
-
-                # terminal board state connect 4!
-                if count >= 4:
-                    return Board(
-                        board=new_board,
-                        state=WIN
-                    )
-
-        if np.sum(self.stack) == (col * row - 1) and not state:
+        # Draw
+        if np.sum(stack) == (col * row):
             state = DRAW
-        else:
-            state = PLAY
 
+        # Horizontal
+        current_row = new_board[count, :]
+        if self._count_connected(current_row) > 4:
+            state = WIN
+
+        # Vertical case
+        current_col = new_board[:, action]
+        if self._count_connected(current_col) > 4:
+            state = WIN
+
+        # Diagonal cases (first diagonal)
+        diagonal_index = diagonal_ref[count][action]
+        current_diagonal = new_board.diagonal(diagonal_index)
+        if self._count_connected(current_diagonal) > 4:
+            state = WIN
+
+        # Second diagonal
+        diagonal_index = reverse_diagonal_ref[count][action]
+        current_diagonal = np.flipud(new_board).diagonal(diagonal_index)
+        if self._count_connected(current_diagonal) > 4:
+            state = WIN
+
+        # Game does not terminate
         return Board(
             board=new_board,
-            state=state
+            state=state,
+            stack=stack
         )
 
     def get_valid_actions(self) -> Set:
@@ -93,3 +129,15 @@ class Board:
 
     def __str__(self):
         return str(self.board)
+
+
+if __name__ == '__main__':
+    print(diagonal_ref)
+    print(reverse_diagonal_ref)
+
+    test_board = Board.empty()
+    test_board.board[5, 5] = 1
+    print(test_board)
+    print(test_board.board.diagonal(diagonal_ref[5, 5]))
+    print(np.flipud(test_board.board).diagonal(reverse_diagonal_ref[5, 5]))
+
