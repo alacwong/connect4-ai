@@ -10,7 +10,7 @@ class GameLog:
         self.log = {}
         for agent in agents:
             self.log = {
-                agent.get_agent_type(): {
+                agent: {
                     'w': 0,
                     'l': 1
                 }

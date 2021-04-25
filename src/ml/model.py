@@ -1,10 +1,10 @@
 import tensorflow as tf
-from src.constants import col, row
+import time
 
 
 class Model:
     """
-    Lite model for efficient policy value rollouts
+    Life Model wrapper for efficient policy value rollouts
     """
 
     @classmethod
@@ -16,11 +16,20 @@ class Model:
         converter = tf.lite.TFLiteConverter.from_keras_model(model)
         lite_model = converter.convert()
         interpreter = tf.lite.Interpreter(model_content=lite_model)
-        return Model(interpreter)
+        return Model(interpreter, model_content=lite_model)
 
-    def __init__(self, interpreter):
+    def save(self, path):
+        """Serialize model"""
+        if self.model_content:
+            with open(f'{path}/model.tflite', 'wb') as f:
+                f.write(self.model_content)
+        else:
+            print('Model already serialized')
+
+    def __init__(self, interpreter, model_content=None):
         """ Set up model"""
         self.interpreter = interpreter
+        self.model_content = model_content
         self.interpreter.allocate_tensors()
         input_det = self.interpreter.get_input_details()[0]
         output_det = self.interpreter.get_output_details()[0]
@@ -35,8 +44,15 @@ class Model:
         """
         Predict single input, this is ok cuz we only ever use that
         """
-        inp = inp.reshape((1, col * row))
+        inp = inp.reshape(self.input_shape)
         self.interpreter.set_tensor(self.input_index, inp)
         self.interpreter.invoke()
         out = self.interpreter.get_tensor(self.output_index)
         return out
+
+
+if __name__ == '__main__':
+    # Generate models
+    start = time.time()
+    test_model = Model.from_file('generated/initial/value/model.tflite')
+    print(f'Model loaded in {time.time() - start}')

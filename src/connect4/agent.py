@@ -1,6 +1,7 @@
 """
 Agent class for different nn models
 """
+from __future__ import annotations
 
 from abc import ABC, abstractmethod
 import numpy as np
@@ -44,6 +45,13 @@ class Agent(ABC):
         """
         pass
 
+    @abstractmethod
+    def copy(self) -> Agent:
+        """
+        Copies agent
+        """
+        pass
+
 
 class RandomAgent(Agent):
     """
@@ -78,6 +86,12 @@ class RandomAgent(Agent):
         Reset agent's memory to initial values
         """
         self.board = Board.empty()
+
+    def copy(self) -> Agent:
+        """
+        Copies agent
+        """
+        return RandomAgent()
 
 
 class MCTSAgent(Agent):
@@ -128,6 +142,16 @@ class MCTSAgent(Agent):
         self.tree = Node(board=Board.empty(), action_id=0, depth=0)
         self.root = self.tree
 
+    def copy(self) -> Agent:
+        """
+        Copies agent
+        """
+        return MCTSAgent(
+            value_network=self.value_model,
+            policy_network=self.policy_model,
+            agent_type=self.agent_type
+        )
+
 
 class MiniMaxAgent(Agent):
     """
@@ -153,6 +177,11 @@ class MiniMaxAgent(Agent):
         """
         pass
 
+    def copy(self) -> Agent:
+        """
+        Copies agent
+        """
+
 
 class HumanAgent(Agent):
     """
@@ -177,6 +206,11 @@ class HumanAgent(Agent):
         """
         pass
 
+    def copy(self) -> Agent:
+        """
+        Copies agent
+        """
+
 
 class QAgent(Agent):
     """
@@ -198,20 +232,25 @@ class QAgent(Agent):
         """
         pass
 
+    def copy(self) -> Agent:
+        """
+        Copies agent
+        """
+
 
 class AgentFactory:
 
     @staticmethod
-    def get_agent(agent_type, **kwargs) -> Agent:
+    def get_agent(agent_code, **kwargs) -> Agent:
         """
         Factory method to get agent
         """
 
-        if agent_type == MCTS:
+        if agent_code == MCTS:
             return MCTSAgent(**kwargs)
-        elif agent_type == HUMAN:
+        elif agent_code == HUMAN:
             pass
-        elif agent_type == RANDOM:
+        elif agent_code == RANDOM:
             pass
-        elif agent_type == MINIMAX:
+        elif agent_code == MINIMAX:
             pass

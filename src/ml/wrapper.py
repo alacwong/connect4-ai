@@ -21,7 +21,6 @@ class ValueModel(ABC):
         pass
 
 
-
 class PolicyModel(ABC):
 
     @abstractmethod
@@ -58,13 +57,13 @@ class MockPolicyModel(PolicyModel):
 
 class AlphaValueModel(ValueModel):
 
-    def __init__(self, network=None):
+    def __init__(self, model=None):
         # initial network, load from python,
         # otherwise load from serialized file
-        if not network:
+        if not model:
             self.network = Model.from_keras(get_value_network())
         else:
-            self.network = Model.from_keras(network)
+            self.network = model
 
     def compute_value(self, state) -> float:
         return self.network.predict(state)[0][0]
@@ -72,19 +71,19 @@ class AlphaValueModel(ValueModel):
     @classmethod
     def load_from_file(cls, path):
         """Load model from file"""
-        model = tf.keras.models.load_model(path)
-        return cls(network=model)
+        model = Model.from_file(path)
+        return cls(model=model)
 
 
 class AlphaPolicyModel(PolicyModel):
 
-    def __init__(self, network=None):
+    def __init__(self, model=None):
         # initial network, load from python,
         # otherwise load from serialized file
-        if not network:
+        if not model:
             self.network = Model.from_keras(get_policy_network())
         else:
-            self.network = Model.from_keras(network)
+            self.network = model
 
     def compute_policy(self, state: np.ndarray, valid_actions) -> np.array:
         dist = self.network.predict(state)[0]
@@ -96,5 +95,5 @@ class AlphaPolicyModel(PolicyModel):
     @classmethod
     def load_from_file(cls, path):
         """Load model from file"""
-        model = tf.keras.models.load_model(path)
-        return cls(network=model)
+        model = Model.from_file(path)
+        return cls(model=model)

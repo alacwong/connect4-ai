@@ -18,6 +18,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 import uuid
 
+from ml.model import Model
 from src.ml.train_util import record_tree
 from src.constants import PLAY, DRAW, MCTS
 from src.connect4.board import Board
@@ -67,38 +68,40 @@ class RandomSingle(Trainer):
         5. iterate/repeat
         """
 
-        num_iterations = 0
-
-        value_network, policy_network = get_value_network(), get_policy_network()
-        kwargs = {
-            'value_network': AlphaValueModel(network=value_network),
-            'policy_network': AlphaPolicyModel(network=policy_network)
-        }
-        agent = AgentFactory.get_agent('mcts', kwargs=kwargs)
-        self.agents = {agent.get_agent_type(): agent}
-        self.current_agent = agent.get_agent_type()
+        num_generations = 0
+        agent = self.agents[self.current_agent].copy()
 
         # may increase during later iterations
         max_games = 1
 
-        while num_iterations < self.max_iterations:
+        while num_generations < self.max_generations:
+            print(f'Generation: {num_generations}')
             self._train(agent, max_games)
 
+            # Train new model with
             value_network, policy_network = get_value_network(), get_policy_network()
             states, priors, values = np.array(self.states, dtype=int), np.array(self.priors), np.array(self.values)
             value_network.fit(states, values)
             policy_network.fit(states, priors)
-            agent_type = 'todo'
+
+            # Create new agent
+            value_network = Model.from_keras(value_network)
+            policy_network = Model.from_keras(policy_network)
+            agent_type = f'mcts <Generation: {num_generations}>'
             kwargs = {
-                'value_network': AlphaValueModel(network=value_network),
-                'policy_network': AlphaPolicyModel(network=policy_network),
+                'value_network': AlphaValueModel(model=value_network),
+                'policy_network': AlphaPolicyModel(model=policy_network),
                 'agent_type': agent_type
             }
-            value_network.save(f'generated/{agent_type}')
-            policy_network.save(f'generated/{agent_type}')
             agent = AgentFactory.get_agent('mcts', **kwargs)
+
+            # Save every kth generation (excluding the first)
+            if num_generations % 5 == 0 and num_generations > 0:
+                value_network.save(f'generated/{self.save_dir}/generation_{num_generations}/value')
+                policy_network.save(f'generated/{self.save_dir}/generation_{num_generations}/policy')
+
             self.priors, self.values, self.states = [], [], []
-            num_iterations += 1
+            num_generations += 1
 
     def _train(self, agent, max_games):
         """
@@ -109,21 +112,25 @@ class RandomSingle(Trainer):
 
         while num_games < max_games:
 
+            print(f'Game: {num_games + 1}')
+
+            # Setup agents
             board = Board.empty()
             num_turns = 0
             opposition = self._sample_opponent()
 
             flip = np.random.randint(0, 2)
             if flip == 0:
-                player_1, player_2 = agent, opposition
+                player_0, player_1 = agent, opposition
             else:
-                player_1, player_2 = opposition, agent
+                player_0, player_1 = opposition, agent
 
             players = {
-                1: player_1,
-                2: player_2
+                0: player_0,
+                1: player_1
             }
 
+            # Connect 4 game loop
             while True:
                 turn = num_turns % 2
 
@@ -151,11 +158,16 @@ class RandomSingle(Trainer):
             else:
                 self.game_log.update(agent, opposition, 1)
 
+            # Reset player memories with founding titan
+            agent.reset()
+            opposition.reset()
+
             num_games += 1
 
     def _update_data(self, agent_1: Agent, agent_2: Agent):
         """ Record training data from """
 
+        # Add to training data based on game play
         def update(agent):
             priors, values, states = record_tree(agent.tree)
             self.priors.extend(priors)
@@ -174,25 +186,26 @@ class RandomSingle(Trainer):
         """
         log = self.game_log.log
 
-        agents = np.array([game for game in log])
+        agents = np.array([agent for agent in log])
         dist = np.array(
-            [game['l'] / (game['l'] + game['w']) for game in log]
+            [log[agent]['l'] / (log[agent]['l'] + log[agent]['w']) for agent in log]
         )
-        selected_agent = agents[np.random.choice(np.arange(len(agents)), p=dist)]
+        selected_agent = np.random.choice(np.array(agents), p=dist)
         return self.agents[selected_agent]
 
-    def __init__(self, max_iterations, initial_value, initial_policy):
-        self.max_iterations = max_iterations
-        self.current_agent = str(uuid.uuid4())
+    def __init__(self, max_generations, initial_value, initial_policy):
+        self.max_generations = max_generations
+        self.current_agent = 'mcts: <Generation: Initial>'
         self.agents = {
             self.current_agent: AgentFactory.get_agent(
                 MCTS, **{
                     'value_network': AlphaValueModel(initial_value),
-                    'policy_network': AlphaPolicyModel(initial_policy)
+                    'policy_network': AlphaPolicyModel(initial_policy),
+                    'agent_type': 'mcts: <Generation: Initial>'
                 }
             )
         }
-        self.game_log = GameLog([])
+        self.game_log = GameLog(self.agents)
         self.priors = []
         self.values = []
         self.states = []
@@ -216,7 +229,9 @@ class RandomMulti(Trainer):
 
 if __name__ == '__main__':
     print('Test training :)')
-    trainer = RandomSingle(max_iterations=5,
-                           initial_value=AlphaValueModel.load_from_file('generated/initial/value'),
-                           initial_policy=AlphaPolicyModel.load_from_file('generated/initial/policy'))
+    trainer = RandomSingle(
+        max_generations=5,
+        initial_value=Model.from_file('generated/initial/value/model.tflite'),
+        initial_policy=Model.from_file('generated/initial/policy/model.tflite')
+    )
     trainer.train()

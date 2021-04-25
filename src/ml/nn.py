@@ -50,11 +50,16 @@ def get_cnn_value_model():
     return model
 
 
-def get_policy_network():
+def get_policy_network(from_file=False):
     """
     policy architecture
     :return:
     """
+
+    path = 'generated/initial/policy'
+
+    if from_file:
+        return tf.keras.models.load_model(path)
 
     with tf.device(device):
         model = keras.Sequential(
@@ -67,14 +72,21 @@ def get_policy_network():
         )
 
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    # model.save(path)
     return model
 
 
-def get_value_network():
+def get_value_network(from_file=False):
     """
     value network architecture
     :return:
     """
+
+    path = 'generated/initial/value'
+
+    if from_file:
+        return tf.keras.models.load_model(path)
+
     with tf.device(device):
         model = keras.Sequential(
             [
