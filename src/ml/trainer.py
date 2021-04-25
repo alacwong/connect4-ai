@@ -16,7 +16,6 @@ Plan for training networks (from mcts self play)
 
 from abc import ABC, abstractmethod
 import numpy as np
-import uuid
 
 from ml.model import Model
 from src.ml.train_util import record_tree
@@ -137,8 +136,10 @@ class RandomSingle(Trainer):
                 # play
                 action = players[turn].play()
                 players[(num_turns + 1) % 2].update_state(action)
+                self._update_data(agent, opposition)
 
                 board = board.play_action(action)
+                # print(board)
 
                 if board.state != PLAY:
                     break
@@ -190,6 +191,7 @@ class RandomSingle(Trainer):
         dist = np.array(
             [log[agent]['l'] / (log[agent]['l'] + log[agent]['w']) for agent in log]
         )
+        dist /= np.sum(dist)
         selected_agent = np.random.choice(np.array(agents), p=dist)
         return self.agents[selected_agent]
 

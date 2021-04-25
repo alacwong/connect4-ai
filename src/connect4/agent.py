@@ -105,7 +105,6 @@ class MCTSAgent(Agent):
         self.value_model = value_network
         self.policy_model = policy_network
         self.agent_type = agent_type
-        self.agent_id = str(uuid.uuid4())
 
     def play(self) -> int:
         """
@@ -124,10 +123,18 @@ class MCTSAgent(Agent):
         :return:
         """
 
-        # traverse tree
-        for child in self.root.children:
-            if child.action_id == action:
-                self.root = child
+        # traverse tree if has children
+        if self.root.children:
+            for child in self.root.children:
+                if child.action_id == action:
+                    self.root = child
+        else:   # special case for updating second player
+            self.tree = Node(
+                board=self.root.board.play_action(action),
+                action_id=action,
+                depth=1
+            )
+            self.root = self.tree
 
     def get_agent_type(self):
         """

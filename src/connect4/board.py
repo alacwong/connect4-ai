@@ -45,6 +45,8 @@ class Board:
         pos_x, pos_y = action, count
 
         # terminal (check if win)
+        # TODO algorithm is wrong
+        # TODO rewrite in C for efficiency
         for direction in directions:
             dir_x, dir_y = direction
             x, y = pos_x, pos_y

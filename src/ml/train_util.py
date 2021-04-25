@@ -13,6 +13,9 @@ def record_tree(root: Node, min_leaf_value=10):
     :return:
     """
 
+    if root.visit_count < min_leaf_value:
+        return [], [], []
+
     priors = []
     value = []
     states = []
@@ -29,14 +32,19 @@ def record_tree(root: Node, min_leaf_value=10):
                 if child.visit_count > min_leaf_value:
                     q.append(child)
 
-        states.append(str(node.board.board.reshape(col * row))[1:-1])
+        states.append(node.board.board.reshape(col * row))
         value.append(node.total_simulated_reward / node.visit_count)
 
         dist = [0] * row
         for child in node.children:
             dist[child.action_id] = child.visit_count
+        x = dist.copy()
         dist /= np.sum(dist)
+        print(dist, 'dist')
+        print(x, node.visit_count)
 
-        priors.append(str(dist)[1:-1])
+        priors.append(dist)
+
+        # TODO fix nans!!! why the hell are my priors so shit
 
     return priors, value, states

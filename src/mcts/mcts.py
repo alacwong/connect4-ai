@@ -47,7 +47,6 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
         )
         prior_factor = ((max_iterations - num_iterations) / max_iterations) * simulation_constant
         node = current_node.select_node(exploration_factor, prior_factor)
-
         if not node.is_terminal:
             expand_board(node, policy_model, value_model)
             reward = simulate(node, policy_model)
@@ -61,8 +60,7 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
         num_iterations += 1
 
     chosen_child = None
-    # sample first 7 moves stochastically
-    if root.depth < 8:
+    if root.depth < 4:
         dist = np.array([child.visit_count for child in root.children])
         dist = dist / np.sum(dist)
         action = np.random.choice(np.arange(len(root.children)), p=dist)
