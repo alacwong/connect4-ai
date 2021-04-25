@@ -18,6 +18,17 @@ for index in range(-row + 1, row, 1):
 
 reverse_diagonal_ref = np.flipud(diagonal_ref)
 
+# Compute and cache indices of diagonal elements
+diagonal_indices = np.ones((col, row), dtype='int')
+for index in range(-row + 1, row, 1):
+    diagonal = np.diag(diagonal_indices, index)
+    diagonal.setflags(write=True)
+    np.put(diagonal,
+           np.array([ii for ii in range(abs(len(diagonal)))], dtype='int'),
+           np.array([ii for ii in range(abs(len(diagonal)))], dtype='int')
+           )
+reverse_diagonal_indices = np.flipud(diagonal_indices)
+
 
 class Board:
     """
@@ -43,21 +54,29 @@ class Board:
             self.stack = stack
 
     @staticmethod
-    def _count_connected(array) -> int:
+    def _is_win(array, start_index) -> bool:
         """
-        determines longest contiguous sequence of 1s
-        helper for function for detecting "4 in a row"
+        Determines if there is a 4 in a row
         """
-        current_count = 0
-        max_count = 0
-        for tile in array:
-            if tile == 1:
-                current_count += 1
-            else:
-                max_count = max(max_count, current_count)
-                current_count = 0
 
-        return max(max_count, current_count)
+        my_index = start_index - 1
+        count = 1
+        while my_index > 0:
+            if array[my_index] == 1:
+                count += 1
+                my_index -= 1
+            else:
+                break
+
+        my_index = start_index + 1
+        while my_index < len(array):
+            if array[my_index] == 1:
+                count += 1
+                my_index += 1
+            else:
+                break
+
+        return count >= 4
 
     def play_action(self, action):
         """
@@ -82,24 +101,24 @@ class Board:
 
         # Horizontal
         current_row = new_board[count, :]
-        if self._count_connected(current_row) > 4:
+        if self._is_win(current_row, count):
             state = WIN
 
         # Vertical case
         current_col = new_board[:, action]
-        if self._count_connected(current_col) > 4:
+        if self._is_win(current_col, action):
             state = WIN
 
         # Diagonal cases (first diagonal)
         diagonal_index = diagonal_ref[count][action]
         current_diagonal = new_board.diagonal(diagonal_index)
-        if self._count_connected(current_diagonal) > 4:
+        if self._is_win(current_diagonal, diagonal_indices[count, action]):
             state = WIN
 
         # Second diagonal
         diagonal_index = reverse_diagonal_ref[count][action]
         current_diagonal = np.flipud(new_board).diagonal(diagonal_index)
-        if self._count_connected(current_diagonal) > 4:
+        if self._is_win(current_diagonal, reverse_diagonal_indices[count, action]):
             state = WIN
 
         # Game does not terminate
@@ -132,12 +151,19 @@ class Board:
 
 
 if __name__ == '__main__':
+    # Show matrices
     print(diagonal_ref)
     print(reverse_diagonal_ref)
+    print(diagonal_indices)
+    print(np.flipud(diagonal_indices))
 
+    # Test indices are correct
+    print(diagonal_indices.diagonal())
+    print(np.flipud(reverse_diagonal_indices).diagonal())
+
+    # Show diagonals work
     test_board = Board.empty()
     test_board.board[5, 5] = 1
     print(test_board)
     print(test_board.board.diagonal(diagonal_ref[5, 5]))
     print(np.flipud(test_board.board).diagonal(reverse_diagonal_ref[5, 5]))
-
