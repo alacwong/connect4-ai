@@ -136,7 +136,7 @@ class RandomSingle(Trainer):
                 # play
                 action = players[turn].play()
                 players[(num_turns + 1) % 2].update_state(action)
-                self._update_data(agent, opposition)
+                self._update_data(players[turn])
 
                 board = board.play_action(action)
                 # print(board)
@@ -165,7 +165,7 @@ class RandomSingle(Trainer):
 
             num_games += 1
 
-    def _update_data(self, agent_1: Agent, agent_2: Agent):
+    def _update_data(self, player: Agent):
         """ Record training data from """
 
         # Add to training data based on game play
@@ -175,11 +175,8 @@ class RandomSingle(Trainer):
             self.values.extend(values)
             self.states.extend(states)
 
-        if agent_1.get_agent_type() == self.current_agent:
-            update(agent_1)
-
-        if agent_2.get_agent_type() == self.current_agent:
-            update(agent_2)
+        if player.get_agent_type() == self.current_agent:
+            update(player)
 
     def _sample_opponent(self) -> Agent:
         """

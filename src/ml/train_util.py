@@ -27,10 +27,10 @@ def record_tree(root: Node, min_leaf_value=10):
         node = q.pop()
 
         # add to q
-        if not node.is_terminal:
-            for child in node.children:
-                if child.visit_count > min_leaf_value:
-                    q.append(child)
+
+        for child in node.children:
+            if child.visit_count > min_leaf_value and not child.is_terminal:
+                q.append(child)
 
         states.append(node.board.board.reshape(col * row))
         value.append(node.total_simulated_reward / node.visit_count)
@@ -40,11 +40,6 @@ def record_tree(root: Node, min_leaf_value=10):
             dist[child.action_id] = child.visit_count
         x = dist.copy()
         dist /= np.sum(dist)
-        print(dist, 'dist')
-        print(x, node.visit_count)
-
         priors.append(dist)
-
-        # TODO fix nans!!! why the hell are my priors so shit
 
     return priors, value, states

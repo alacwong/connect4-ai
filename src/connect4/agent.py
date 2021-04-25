@@ -111,8 +111,8 @@ class MCTSAgent(Agent):
         :return:
         """
         node = monte_carlo_tree_search(self.root, self.value_model, self.policy_model)
+        self.tree = node.parent
         node.parent = None
-        self.tree = node
         self.root = node
         return node.action_id
 
