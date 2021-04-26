@@ -46,4 +46,4 @@ def run(player_0: Agent, player_1: Agent):
         print(f'{player_1.get_agent_type()} wins!')
     print(board)
     print(board.state)
-    print(f' {time.time() - start} s')
+    # print(f' {time.time() - start} s')

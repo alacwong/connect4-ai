@@ -35,10 +35,10 @@ class Node:
             simulated_value = - 1 * self.total_simulated_reward
         else:
             simulated_value = 0
-        q = (1 - prior_factor) * self.expected_reward + (
+        q = (1 - prior_factor) * self.expected_reward * -1 + (
             (prior_factor * simulated_value)
         )
-        return -1 * (u + q)
+        return u + q
 
     def select_node(self, exploration_factor: float, prior_factor: float) -> Node:
         """
@@ -77,7 +77,7 @@ class Node:
         children = ''
         for child in self.children:
             if child.visit_count:
-                value = -1 * child.total_simulated_reward / child.visit_count
+                value = child.total_simulated_reward / child.visit_count
             else:
                 value = 0
             children += f'{child.action_id}: [value: {value}, visited: {child.visit_count}]\n'

@@ -3,3 +3,4 @@ script.sh
 **/*.ipynb_checkpoints/
 .idea
 generated
+.DS_Store

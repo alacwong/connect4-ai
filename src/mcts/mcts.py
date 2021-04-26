@@ -55,7 +55,7 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
             if node.board.state == DRAW:
                 node.update_reward(0)
             else:  # has to be win
-                node.update_reward(1)
+                node.update_reward(-1)
 
         num_iterations += 1
 
@@ -71,7 +71,7 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
             if child.visit_count > max_visit:
                 max_visit = child.visit_count
                 chosen_child = child
-    print(root)
+
     return chosen_child
 
 
@@ -112,38 +112,29 @@ def simulate(node, policy):
     :param policy:
     :return: expected value of node
     """
+    simulated_reward = 0
 
-    if node.is_terminal:
+    # compute expected reward through simulation
+    board = node.board.copy()
 
-        # compute actual reward
-        if node.board.state == WIN: # Position is won for other player, I lose
-            return -1
-        else:  # must be draw
-            return 0
-    else:
-        simulated_reward = 0
+    num_moves = 0
 
-        # compute expected reward through simulation
-        board = node.board.copy()
+    while True:
+        actions = board.get_valid_actions()
+        dist = policy.compute_policy(board.board, actions)
+        # randomly sample from distribution
 
-        num_moves = 0
+        action = np.random.choice(np.arange(row), p=dist)
+        board = board.play_action(action)
+        num_moves += 1
 
-        while True:
-            actions = board.get_valid_actions()
-            dist = policy.compute_policy(board.board, actions)
-            # randomly sample from distribution
+        if board.state == DRAW:
+            break
+        else:
+            if num_moves % 2 == 1:  # Win
+                simulated_reward += 1
+            else:  # Loss
+                simulated_reward -= 1
+            break
 
-            action = np.random.choice(np.arange(row), p=dist)
-            board = board.play_action(action)
-            num_moves += 1
-
-            if board.state == DRAW:
-                break
-            else:
-                if num_moves % 2 == 1:  # Win
-                    simulated_reward += 1
-                else:  # Loss
-                    simulated_reward -= 1
-                break
-
-        return simulated_reward
+    return simulated_reward

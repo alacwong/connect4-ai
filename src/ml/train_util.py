@@ -8,7 +8,6 @@ def record_tree(root: Node):
     Convert tree root into training data
     and serialize as pkl
     :param root:
-    :param min_leaf_value:
     :return:
     """
     priors = []
