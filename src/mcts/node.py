@@ -38,7 +38,7 @@ class Node:
         q = (1 - prior_factor) * self.expected_reward + (
             (prior_factor * simulated_value)
         )
-        return u + q
+        return -1 * (u + q)
 
     def select_node(self, exploration_factor: float, prior_factor: float) -> Node:
         """

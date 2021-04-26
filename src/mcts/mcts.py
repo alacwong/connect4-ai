@@ -71,7 +71,7 @@ def monte_carlo_tree_search(root: Node, value_model: ValueModel, policy_model: P
             if child.visit_count > max_visit:
                 max_visit = child.visit_count
                 chosen_child = child
-
+    print(root)
     return chosen_child
 
 
@@ -116,8 +116,8 @@ def simulate(node, policy):
     if node.is_terminal:
 
         # compute actual reward
-        if node.board.state == WIN:
-            return 1
+        if node.board.state == WIN: # Position is won for other player, I lose
+            return -1
         else:  # must be draw
             return 0
     else:
@@ -135,12 +135,12 @@ def simulate(node, policy):
 
             action = np.random.choice(np.arange(row), p=dist)
             board = board.play_action(action)
-            if board.state == PLAY:
-                num_moves += 1
-            elif board.state == DRAW:
+            num_moves += 1
+
+            if board.state == DRAW:
                 break
             else:
-                if num_moves % 2 == 0:  # Win
+                if num_moves % 2 == 1:  # Win
                     simulated_reward += 1
                 else:  # Loss
                     simulated_reward -= 1

@@ -22,8 +22,6 @@ def run(player_0: Agent, player_1: Agent):
         1: player_1
     }
 
-    is_terminal = True
-
     start = time.time()
 
     while True:
@@ -34,9 +32,18 @@ def run(player_0: Agent, player_1: Agent):
         players[(num_turns + 1) % 2].update_state(action)
 
         board = board.play_action(action)
+        print(f'{players[turn].get_agent_type()} plays {action}')
+        print(board)
+
         num_turns += 1
 
         if board.state != PLAY:
             break
 
+    if num_turns % 2 == 1:
+        print(f'{player_0.get_agent_type()} wins!')
+    else:
+        print(f'{player_1.get_agent_type()} wins!')
+    print(board)
+    print(board.state)
     print(f' {time.time() - start} s')

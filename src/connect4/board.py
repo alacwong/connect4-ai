@@ -61,7 +61,7 @@ class Board:
 
         my_index = start_index - 1
         count = 1
-        while my_index > 0:
+        while my_index >= 0:
             if array[my_index] == 1:
                 count += 1
                 my_index -= 1
@@ -101,12 +101,12 @@ class Board:
 
         # Horizontal
         current_row = new_board[count, :]
-        if self._is_win(current_row, count):
+        if self._is_win(current_row, action):
             state = WIN
 
         # Vertical case
         current_col = new_board[:, action]
-        if self._is_win(current_col, action):
+        if self._is_win(current_col, count):
             state = WIN
 
         # Diagonal cases (first diagonal)

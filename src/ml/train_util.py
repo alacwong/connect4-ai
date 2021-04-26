@@ -1,10 +1,9 @@
 from src.constants import row, col
 from src.mcts.node import Node
 from collections import deque, defaultdict
-import numpy as np
 
 
-def record_tree(root: Node, min_leaf_value=10):
+def record_tree(root: Node):
     """
     Convert tree root into training data
     and serialize as pkl
@@ -12,10 +11,6 @@ def record_tree(root: Node, min_leaf_value=10):
     :param min_leaf_value:
     :return:
     """
-
-    if root.visit_count < min_leaf_value:
-        return [], [], []
-
     priors = []
     value = []
     states = []
@@ -29,11 +24,11 @@ def record_tree(root: Node, min_leaf_value=10):
         # add to q
 
         for child in node.children:
-            if child.visit_count > min_leaf_value and not child.is_terminal:
+            if not child.is_terminal:
                 q.append(child)
 
         states.append(node.board.board.reshape(col * row))
-        value.append(node.total_simulated_reward / node.visit_count)
+        value.append(node.total_simulated_reward)
 
         dist = [0] * row
         for child in node.children:
@@ -43,7 +38,15 @@ def record_tree(root: Node, min_leaf_value=10):
     return priors, value, states
 
 
-def preprocess_data():
+def preprocess_data(states, priors, values):
     """
     Pre-process data into format
+    Leaf nodes have high variance and do not necessarily reflect our true value/policy function
+    to fix this, we can take an average among these leaf nodes
     """
+
+    new_states, new_priors, new_values = [], [], []
+    process_map = {}
+
+    for i in range(states):
+        print('i hope my neural network learns D:')
