@@ -10,7 +10,6 @@ from src.mcts.node import Node
 from src.mcts.mcts import monte_carlo_tree_search
 from src.ml.wrapper import ValueModel, PolicyModel
 from src.constants import HUMAN, MCTS, MINIMAX, RANDOM
-import uuid
 
 
 class Agent(ABC):
@@ -199,7 +198,8 @@ class HumanAgent(Agent):
         pass
 
     def play(self) -> int:
-        pass
+        action = input('Enter an action')
+        return 0
 
     def get_agent_type(self):
         """
@@ -217,6 +217,10 @@ class HumanAgent(Agent):
         """
         Copies agent
         """
+        pass
+
+    def __init__(self, board: Board):
+        self.board = board
 
 
 class QAgent(Agent):

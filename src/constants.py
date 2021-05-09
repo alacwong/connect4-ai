@@ -7,10 +7,11 @@ row = 7
 col = 6
 
 # MCTS constants
-max_iterations = 200
+max_iterations = 400
 simulation_constant = 0.5
 exploration_constant = 10
 exploration_temperature = 0.2
+min_leaves_aggregation = 40
 
 # RL constants
 DRAW = 3

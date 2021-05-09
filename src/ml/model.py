@@ -1,5 +1,6 @@
 import tensorflow as tf
 import time
+import numpy as np
 
 
 class Model:
@@ -39,15 +40,29 @@ class Model:
         self.output_shape = output_det["shape"]
         self.input_dtype = input_det["dtype"]
         self.output_dtype = output_det["dtype"]
+        # self.__cache__ = {}
 
     def predict(self, inp):
         """
         Predict single input, this is ok cuz we only ever use that
         """
+
+        # currently with neural network architecture, caching does not
+        # provide any significant advantage over recomputing due to
+        # tflite being insanely fast, however if we change the architecture
+        # of the neural network, it may be desirable to cache results.
+
+        # tuple_inp = tuple(inp.flatten())
+        # if tuple_inp in self.__cache__:
+        #     print('cache')
+        #     return np.array(tuple_inp, dtype=self.input_dtype).reshape(self.input_shape)
+
         inp = inp.reshape(self.input_shape)
         self.interpreter.set_tensor(self.input_index, inp)
         self.interpreter.invoke()
         out = self.interpreter.get_tensor(self.output_index)
+
+        # self.__cache__[tuple_inp] = tuple(out.flatten())
         return out
 
 
